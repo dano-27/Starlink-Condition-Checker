@@ -1120,7 +1120,7 @@ function renderCellularResults(cellData, lat, lon, containerId) {
   const cards = sorted.map(([name, info], idx) => {
     const style = carrierInfo[name];
     const pct = Math.round((info.towers / maxTowers) * 100);
-    const isBest = idx === 0 && info.towers > 0;
+    const isBest = idx === 0 && info.towers > 0 && totalCarrierTowers > 3;
     
     const techParts = [];
     if (info.nr)   techParts.push(info.nr + ' 5G');

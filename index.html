@@ -1115,6 +1115,7 @@ function renderCellularResults(cellData, lat, lon, containerId) {
   const sorted = Object.entries(c).sort((a, b) => b[1].towers - a[1].towers);
   const best = sorted[0];
   const maxTowers = Math.max(1, ...sorted.map(s => s[1].towers));
+  const totalCarrierTowers = sorted.reduce((s, e) => s + e[1].towers, 0);
   
   // Build individual carrier cards
   const cards = sorted.map(([name, info], idx) => {
@@ -1154,7 +1155,6 @@ function renderCellularResults(cellData, lat, lon, containerId) {
   }).join('');
   
   // Coverage quality alert
-  const totalCarrierTowers = sorted.reduce((s, e) => s + e[1].towers, 0);
   const maxCarrierTowers = best[1].towers;
   let coverageAlert = '';
   

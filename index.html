@@ -1174,7 +1174,7 @@ function renderCellularResults(cellData, lat, lon, containerId) {
       <span style="font-size:22px;flex-shrink:0">⚠️</span>
       <div>
         <div style="font-size:14px;font-weight:800;color:#EF4444;margin-bottom:4px">Poor Cellular Coverage Area</div>
-        <div style="font-size:12px;color:var(--muted);line-height:1.65">Only <strong style="color:var(--text)">${totalCarrierTowers}</strong> cell tower${totalCarrierTowers !== 1 ? 's' : ''} detected from major carriers in this area. <strong style="color:#EF4444">Cellular connectivity should not be relied upon at this location.</strong> We strongly recommend Starlink as the primary connectivity solution and suggest bringing a satellite phone for emergency backup. Conduct an on-site speed test before your event if cellular is your only option.</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65">Only <strong style="color:var(--text)">${totalCarrierTowers}</strong> cell tower${totalCarrierTowers !== 1 ? 's' : ''} detected from major carriers in this area. <strong style="color:#EF4444">Cellular connectivity should not be relied upon at this location.</strong> Cellular service will be unreliable at best in this area. We strongly recommend conducting an on-site speed test before committing and exploring alternative connectivity solutions.</div>
       </div>
     </div>`;
   } else if (totalCarrierTowers <= 6 || maxCarrierTowers <= 2) {
@@ -1182,7 +1182,7 @@ function renderCellularResults(cellData, lat, lon, containerId) {
       <span style="font-size:22px;flex-shrink:0">⚡</span>
       <div>
         <div style="font-size:14px;font-weight:800;color:#FBBF24;margin-bottom:4px">Limited Cellular Coverage</div>
-        <div style="font-size:12px;color:var(--muted);line-height:1.65">Only <strong style="color:var(--text)">${totalCarrierTowers}</strong> cell towers detected nearby. Coverage may be spotty or unreliable, especially indoors or during peak usage. We recommend Starlink as your primary connection and cellular as a backup only. An on-site speed test before the event is highly recommended.</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65">Only <strong style="color:var(--text)">${totalCarrierTowers}</strong> cell towers detected nearby. Coverage may be spotty or unreliable, especially indoors or during peak usage. Cellular service may be unreliable, especially indoors or during peak usage. We strongly recommend conducting an on-site speed test before your event.</div>
       </div>
     </div>`;
   }
@@ -1193,24 +1193,24 @@ function renderCellularResults(cellData, lat, lon, containerId) {
     const diff2 = best[1].towers - sorted[1][1].towers;
     const diff3 = best[1].towers - sorted[2][1].towers;
     if (diff2 === 0) {
-      recText = best[0] + ' and ' + sorted[1][0] + ' are tied for the best coverage at this location with ' + best[1].towers + ' tower' + (best[1].towers > 1 ? 's' : '') + ' each. Either carrier would be a solid choice for a cellular backup router.';
+      recText = best[0] + ' and ' + sorted[1][0] + ' are tied for the best coverage at this location with ' + best[1].towers + ' tower' + (best[1].towers > 1 ? 's' : '') + ' each. Either carrier would be a solid choice for your event connectivity.';
     } else if (diff2 <= 2) {
       recText = best[0] + ' has a slight edge over ' + sorted[1][0] + ' at this location (' + best[1].towers + ' vs ' + sorted[1][1].towers + ' towers). Both carriers should provide reliable service here.';
     } else {
-      recText = best[0] + ' is the clear winner at this location with ' + best[1].towers + ' tower' + (best[1].towers > 1 ? 's' : '') + ' detected — ' + diff2 + ' more than ' + sorted[1][0] + ' (' + sorted[1][1].towers + ') and ' + diff3 + ' more than ' + sorted[2][0] + ' (' + sorted[2][1].towers + '). We recommend using a ' + best[0] + ' hotspot or SIM for your backup connectivity.';
+      recText = best[0] + ' is the clear winner at this location with ' + best[1].towers + ' tower' + (best[1].towers > 1 ? 's' : '') + ' detected — ' + diff2 + ' more than ' + sorted[1][0] + ' (' + sorted[1][1].towers + ') and ' + diff3 + ' more than ' + sorted[2][0] + ' (' + sorted[2][1].towers + '). We recommend using a ' + best[0] + ' hotspot or SIM for your event connectivity.';
     }
   } else {
-    recText = 'No major US carrier cell towers were detected within range of this location. Cellular connectivity is not viable here — Starlink should be your sole connectivity solution, with a satellite phone as an emergency backup.';
+    recText = 'No major US carrier cell towers were detected within range of this location. Cellular connectivity is not viable at this location. Consider alternative internet solutions such as Starlink satellite internet or a satellite phone for emergency connectivity.';
   }
   
   // Override recommendation for very poor coverage
   if (totalCarrierTowers <= 3 && best[1].towers > 0) {
-    recText = 'With only ' + totalCarrierTowers + ' total cell tower' + (totalCarrierTowers !== 1 ? 's' : '') + ' detected, cellular service at this location will be unreliable at best. Do not depend on cellular data for your event. Starlink should be your primary internet solution. If you must have a cellular backup, ' + best[0] + ' is the only viable option with ' + best[1].towers + ' tower' + (best[1].towers !== 1 ? 's' : '') + ' in range, but expect degraded performance.';
+    recText = 'With only ' + totalCarrierTowers + ' total cell tower' + (totalCarrierTowers !== 1 ? 's' : '') + ' detected, cellular service at this location will be unreliable at best. If cellular is your only option, ' + best[0] + ' is the strongest carrier with ' + best[1].towers + ' tower' + (best[1].towers !== 1 ? 's' : '') + ' in range, but expect degraded performance. We strongly recommend an on-site speed test and considering alternative connectivity solutions.';
   }
 
   container.innerHTML = `
     <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px">
-      We scanned <strong style="color:var(--text)">${cellData.totalTowers} cell tower${cellData.totalTowers !== 1 ? 's' : ''}</strong> within ~1.8 km of this location to determine the best cellular carrier for backup connectivity.
+      We scanned <strong style="color:var(--text)">${cellData.totalTowers} cell tower${cellData.totalTowers !== 1 ? 's' : ''}</strong> within ~1.8 km of this location to determine the best cellular carrier for your event.
     </p>
     ${coverageAlert}
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">${cards}</div>

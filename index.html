@@ -961,7 +961,7 @@ const OPENCELLID_KEY = 'pk.4a7d7eb9c9ddac93c7621b7ddb0e6bb2';
 
 // US carrier MCC+MNC mapping
 const CARRIER_MAP = {
-  'T-Mobile':  { 310: [260,200,210,220,230,240,250,270,310,490,530,580,660,800], 311: [490], 312: [250], 316: [10] },
+  'T-Mobile':  { 310: [260,200,210,220,230,240,250,270,310,490,530,580,660,800,120], 311: [490], 312: [250], 316: [10] },
   'AT&T':      { 310: [410,70,150,170,380,560,680,980], 311: [180], 312: [670,680] },
   'Verizon':   { 310: [4,5,6,10,12,350,590,820,890,910], 311: [270,271,272,273,274,275,276,277,278,279,280,281,282,283,284,285,286,287,288,289,480,481,482,483,484,485,486,487,488,489], 312: [770] }
 };
@@ -975,11 +975,11 @@ function identifyCarrier(mcc, mnc) {
 
 async function getCellularCoverage(lat, lon) {
   // Build a ~1.8km x 1.8km bounding box (~3.2 km², under the 4 km² API limit)
-  const offset = 0.009; // ~1km in latitude
+  const offset = 0.008; // ~0.9km in latitude
   const lonOffset = offset / Math.cos(lat * Math.PI / 180);
   const bbox = `${(lat - offset).toFixed(6)},${(lon - lonOffset).toFixed(6)},${(lat + offset).toFixed(6)},${(lon + lonOffset).toFixed(6)}`;
   
-  const url = `https://opencellid.org/cell/getInArea?key=${OPENCELLID_KEY}&BBOX=${bbox}&format=json&limit=200`;
+  const url = 'https://opencellid.org/cell/getInArea?key=' + OPENCELLID_KEY + '&BBOX=' + bbox + '&format=json&limit=200';
   
   const res = await fetch(url);
   const data = await res.json();

@@ -418,6 +418,24 @@
     .nstep h4 { font-size: 14px; font-weight: 700; margin-bottom: 7px; }
     .nstep p  { font-size: 12px; color: var(--muted); line-height: 1.55; }
 
+    /* Mode toggle */
+    .mode-toggle {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+      background: rgba(5,15,34,.9); border: 1px solid var(--border);
+      border-radius: 14px; padding: 4px; margin-bottom: 28px;
+    }
+    .mode-btn {
+      background: transparent; border: none; border-radius: 11px;
+      padding: 12px 16px; font-size: 13px; font-weight: 700;
+      color: var(--muted); cursor: pointer; transition: all .25s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .mode-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; box-shadow: 0 4px 15px rgba(56,189,248,.25);
+    }
+    .mode-btn:not(.active):hover { color: var(--text); background: rgba(255,255,255,.04); }
+
     /* Disclaimer */
     .disclaimer {
       text-align: center; color: var(--dim); font-size: 11px;
@@ -503,25 +521,30 @@
 
     <div class="form-wrap">
       <div class="form-card">
-        <div class="form-card-title">📍 Assess Your Event Site</div>
+        <div class="mode-toggle">
+          <button class="mode-btn active" id="mode-starlink" onclick="setMode('starlink')">🛰️ Starlink Assessment</button>
+          <button class="mode-btn" id="mode-cellular" onclick="setMode('cellular')">📶 Cellular Check</button>
+        </div>
 
-        <div class="fg">
+        <div class="form-card-title" id="form-title">📍 Assess Your Event Site</div>
+
+        <div class="fg" id="fg-name">
           <label>Event Name <span style="opacity:.4;font-weight:400;text-transform:none">(optional)</span></label>
           <input type="text" id="inp-name" placeholder="e.g. Summer Music Festival 2026" />
         </div>
 
-        <div class="row">
+        <div class="row" id="fg-loc-date">
           <div class="fg">
             <label>Event Location *</label>
             <input type="text" id="inp-loc" placeholder="Address, venue, or city…" />
           </div>
-          <div class="fg">
+          <div class="fg" id="fg-date">
             <label>Event Date *</label>
             <input type="date" id="inp-date" />
           </div>
         </div>
 
-        <div class="fg">
+        <div class="fg" id="fg-venue">
           <label>Venue Type</label>
           <select id="inp-venue" style="width:100%; background:rgba(5,15,34,.9); border:1px solid var(--border); border-radius:13px; padding:14px 18px; font-size:14px; font-weight:600; color:var(--text); outline:none; appearance:none; cursor:pointer;">
             <option value="auto">🤖 Auto-Detect (Recommended)</option>
@@ -541,11 +564,16 @@
         </button>
       </div>
 
-      <div class="trust-strip">
+      <div class="trust-strip" id="trust-strip-starlink">
         <span>🛰️ Real satellite data</span>
         <span>🌦️ Live weather</span>
         <span>🏔️ Terrain elevation scan</span>
         <span>⚡ Results in ~30 sec</span>
+      </div>
+      <div class="trust-strip" id="trust-strip-cellular" style="display:none">
+        <span>📶 Live cell tower data</span>
+        <span>🗼 Verizon · AT&T · T-Mobile</span>
+        <span>⚡ Results in ~10 sec</span>
       </div>
     </div>
   </div>
@@ -722,6 +750,45 @@
       Results are indicative only and may not account for local obstructions such as trees, buildings, or structures not captured in elevation data.
       For high-stakes events, we recommend an on-site test deployment.
       <br/>Data: Open-Meteo · OpenTopoData · OpenStreetMap Nominatim · CartoDB
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       CELLULAR-ONLY RESULTS
+  ═══════════════════════════════════════════ -->
+  <div id="cellular-results-screen" style="display:none; max-width:900px; margin:0 auto; padding:36px 24px 60px;">
+    <div class="loc-bar fade-up">
+      <div class="loc-item"><span>📍</span><span class="lk">Location:</span><span class="lv" id="cr-loc">—</span></div>
+      <div class="loc-sep"></div>
+      <div class="loc-item"><span>🗺️</span><span class="lk">Coords:</span><span class="lv" id="cr-coords">—</span></div>
+      <button class="new-btn" onclick="resetForm()">← New Assessment</button>
+    </div>
+
+    <div class="res-hdr fade-up d1">
+      <div>
+        <h2 id="cr-title">Cellular Coverage Report</h2>
+        <p id="cr-sub">—</p>
+      </div>
+      <div class="res-actions">
+        <button class="btn-outline" onclick="window.print()">🖨️ Print Report</button>
+        <button class="btn-primary" onclick="shareCellReport()">📤 Share</button>
+      </div>
+    </div>
+
+    <div class="card fade-up d2" style="margin-bottom:20px">
+      <div class="card-title">📶 Cellular Analysis</div>
+      <div id="cellular-only-results"></div>
+    </div>
+
+    <div class="card fade-up d3" style="margin-bottom:20px">
+      <div class="card-title">📍 Location Map</div>
+      <div id="cell-map" style="height:300px;border-radius:13px;overflow:hidden"></div>
+    </div>
+
+    <div class="disclaimer">
+      Cell tower data sourced from OpenCelliD — the world's largest open database of cell towers.
+      Tower counts indicate density of registered cell sites, not signal strength.
+      For the most accurate assessment, verify with the carrier's official coverage map.
     </div>
   </div>
 
@@ -1640,9 +1707,86 @@ async function runAnalysis() {
 /* ═══════════════════════════════════════════════════════
    RESET & SHARE
 ═══════════════════════════════════════════════════════ */
+let currentMode = 'starlink';
+let cellMap = null;
+let lastCellData = {};
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('mode-starlink').classList.toggle('active', mode === 'starlink');
+  document.getElementById('mode-cellular').classList.toggle('active', mode === 'cellular');
+  const isCell = mode === 'cellular';
+  document.getElementById('fg-name').style.display = isCell ? 'none' : '';
+  document.getElementById('fg-date').style.display = isCell ? 'none' : '';
+  document.getElementById('fg-venue').style.display = isCell ? 'none' : '';
+  document.getElementById('trust-strip-starlink').style.display = isCell ? 'none' : '';
+  document.getElementById('trust-strip-cellular').style.display = isCell ? '' : 'none';
+  document.getElementById('form-title').textContent = isCell ? '📶 Check Cellular Coverage' : '📍 Assess Your Event Site';
+  document.getElementById('analyze-btn').innerHTML = isCell ? '📶 &nbsp;Run Cellular Check' : '🔍 &nbsp;Run Site Assessment';
+  document.getElementById('analyze-btn').onclick = isCell ? runCellularCheck : runAnalysis;
+}
+
+async function runCellularCheck() {
+  const locVal = document.getElementById('inp-loc').value.trim();
+  if (!locVal) { showErr('Please enter a location.'); return; }
+  document.getElementById('home-screen').style.display = 'none';
+  document.getElementById('loading-screen').style.display = 'block';
+  document.getElementById('load-loc-text').textContent = 'Running cellular analysis…';
+  ['geocode','satellite','terrain','weather','cellular','score'].forEach(id => setLS(id, 'waiting'));
+  document.getElementById('ls-satellite').style.display = 'none';
+  document.getElementById('ls-terrain').style.display = 'none';
+  document.getElementById('ls-weather').style.display = 'none';
+  document.getElementById('ls-score').style.display = 'none';
+  setProg(0);
+  try {
+    setLS('geocode', 'active');
+    const location = await geocode(locVal);
+    document.getElementById('load-loc-text').textContent = 'Scanning cell towers near ' + location.shortName + '…';
+    setLS('geocode', 'done'); setProg(35); await sleep(300);
+    setLS('cellular', 'active');
+    let cellData = null;
+    try { cellData = await getCellularCoverage(location.lat, location.lon); } catch(e) { console.warn('Cellular error:', e.message); }
+    setLS('cellular', 'done'); setProg(100); await sleep(400);
+    renderCellularOnlyResults(location, cellData);
+  } catch(err) {
+    console.error(err);
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('home-screen').style.display = 'block';
+    ['satellite','terrain','weather','score'].forEach(id => document.getElementById('ls-' + id).style.display = '');
+    showErr(err.message || 'Analysis failed');
+  }
+}
+
+function renderCellularOnlyResults(location, cellData) {
+  document.getElementById('cr-loc').textContent = location.shortName;
+  document.getElementById('cr-coords').textContent = location.lat.toFixed(4) + '°, ' + location.lon.toFixed(4) + '°';
+  document.getElementById('cr-title').textContent = 'Cellular Coverage Report';
+  document.getElementById('cr-sub').textContent = location.displayName.length > 85 ? location.displayName.slice(0, 83) + '…' : location.displayName;
+  // Reuse rendering logic targeting cellular-only container
+  const origContainer = document.getElementById('cellular-results');
+  const cellOnlyContainer = document.getElementById('cellular-only-results');
+  cellOnlyContainer.id = 'cellular-results';
+  renderCellularResults(cellData, location.lat, location.lon);
+  cellOnlyContainer.id = 'cellular-only-results';
+  origContainer.id = 'cellular-results';
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('cellular-results-screen').style.display = 'block';
+  window.scrollTo(0, 0);
+  ['satellite','terrain','weather','score'].forEach(id => document.getElementById('ls-' + id).style.display = '');
+  setTimeout(() => {
+    if (cellMap) { cellMap.remove(); cellMap = null; }
+    cellMap = L.map(document.getElementById('cell-map')).setView([location.lat, location.lon], 14);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB' }).addTo(cellMap);
+    L.marker([location.lat, location.lon]).addTo(cellMap);
+    setTimeout(() => cellMap.invalidateSize(), 200);
+  }, 300);
+  lastCellData = { location, cellData };
+}
+
 function resetForm() {
   document.getElementById('results-screen').style.display = 'none';
-  document.getElementById('home-screen').style.display    = 'block';
+  document.getElementById('cellular-results-screen').style.display = 'none';
+  document.getElementById('home-screen').style.display = 'block';
   window.scrollTo(0, 0);
 }
 
@@ -1658,7 +1802,6 @@ async function shareReport() {
     ``,
     `Run your own assessment at fello.io/site-checker`
   ].join('\n');
-
   if (navigator.share) {
     try { await navigator.share({ title: 'Fello Site Check Report', text }); return; } catch {}
   }
@@ -1668,8 +1811,29 @@ async function shareReport() {
   } catch { toast('Could not copy — try printing instead', '⚠️'); }
 }
 
+async function shareCellReport() {
+  const d = lastCellData;
+  if (!d.location) return;
+  const c = d.cellData?.carriers || {};
+  const sorted = Object.entries(c).sort((a, b) => b[1].towers - a[1].towers);
+  const lines = ['Fello Cellular Coverage Report', '📍 ' + d.location.shortName, ''];
+  sorted.forEach(([name, info]) => { lines.push(name + ': ' + info.towers + ' towers'); });
+  if (sorted.length && sorted[0][1].towers > 0) { lines.push('', '🏆 Recommended: ' + sorted[0][0]); }
+  lines.push('', 'Run your own check at fello.io/site-checker');
+  const text = lines.join('\n');
+  if (navigator.share) {
+    try { await navigator.share({ title: 'Fello Cellular Report', text }); return; } catch {}
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    toast('Report copied to clipboard!');
+  } catch { toast('Could not copy — try printing instead', '⚠️'); }
+}
+
 // Enter key support
-document.getElementById('inp-loc').addEventListener('keydown', e => { if (e.key === 'Enter') runAnalysis(); });
+document.getElementById('inp-loc').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { if (currentMode === 'cellular') runCellularCheck(); else runAnalysis(); }
+});
 </script>
 
 </body>

@@ -703,9 +703,9 @@
       <div class="recs" id="recs-list"></div>
     </div>
 
-    <!-- Cellular Backup -->
+    <!-- Cellular Analysis -->
     <div class="card fade-up d5" style="margin-bottom:20px" id="cellular-card">
-      <div class="card-title">📶 Cellular Backup Analysis</div>
+      <div class="card-title">📶 Cellular Analysis</div>
       <div id="cellular-results">
         <p style="font-size:13px; color:var(--muted); line-height:1.6">Analyzing cellular coverage…</p>
       </div>
@@ -1006,16 +1006,26 @@ async function getCellularCoverage(lat, lon) {
 function renderCellularResults(cellData, lat, lon) {
   const container = document.getElementById('cellular-results');
   
-  if (!cellData || cellData.error || cellData.totalTowers === 0) {
+  const carrierInfo = {
+    'Verizon':  { color: '#CD040B', bg: 'rgba(205,4,11,.08)', border: 'rgba(205,4,11,.25)', gradient: 'linear-gradient(135deg, #CD040B, #9E0308)', mapUrl: 'https://www.verizon.com/coverage-map/' },
+    'AT&T':     { color: '#00A8E0', bg: 'rgba(0,168,224,.08)', border: 'rgba(0,168,224,.25)', gradient: 'linear-gradient(135deg, #00A8E0, #007CA6)', mapUrl: 'https://www.att.com/maps/wireless-coverage.html' },
+    'T-Mobile': { color: '#E20074', bg: 'rgba(226,0,116,.08)', border: 'rgba(226,0,116,.25)', gradient: 'linear-gradient(135deg, #E20074, #A30053)', mapUrl: 'https://www.t-mobile.com/coverage/coverage-map' }
+  };
+
+  if (!cellData || cellData.totalTowers === 0 || (cellData.error && !cellData.carriers)) {
+    const cards = Object.entries(carrierInfo).map(([name, style]) => `
+      <div style="background:${style.bg};border:1px solid ${style.border};border-radius:15px;padding:20px;text-align:center">
+        <div style="font-size:28px;margin-bottom:8px">📡</div>
+        <div style="font-size:15px;font-weight:800;color:${style.color};margin-bottom:4px">${name}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px">No tower data available</div>
+        <a href="${style.mapUrl}" target="_blank" style="display:inline-block;padding:8px 16px;border-radius:9px;background:${style.gradient};color:white;font-size:12px;font-weight:700;text-decoration:none">Check Coverage Map ↗</a>
+      </div>`).join('');
+    
     container.innerHTML = `
-      <p style="font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:16px">
-        Cell tower data is unavailable for this area. Use the links below to manually verify carrier coverage.
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px">
+        Cell tower data could not be loaded for this area. Use the carrier maps below to manually verify coverage.
       </p>
-      <div class="cell-links">
-        <a href="https://www.verizon.com/coverage-map/" target="_blank" class="cell-btn btn-vzw">Verizon Map ↗</a>
-        <a href="https://www.att.com/maps/wireless-coverage.html" target="_blank" class="cell-btn btn-att">AT&T Map ↗</a>
-        <a href="https://www.t-mobile.com/coverage/coverage-map" target="_blank" class="cell-btn btn-tmo">T-Mobile Map ↗</a>
-      </div>`;
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">${cards}</div>`;
     return;
   }
   
@@ -1024,58 +1034,69 @@ function renderCellularResults(cellData, lat, lon) {
   const best = sorted[0];
   const maxTowers = Math.max(1, ...sorted.map(s => s[1].towers));
   
-  const carrierStyles = {
-    'Verizon':  { color: '#CD040B', gradient: 'linear-gradient(135deg, #CD040B, #9E0308)', icon: '🔴' },
-    'AT&T':     { color: '#00A8E0', gradient: 'linear-gradient(135deg, #00A8E0, #007CA6)', icon: '🔵' },
-    'T-Mobile': { color: '#E20074', gradient: 'linear-gradient(135deg, #E20074, #A30053)', icon: '🟣' }
-  };
-  
-  let bestNote = '';
-  if (best[1].towers > 0) {
-    const strength = best[1].towers >= 10 ? 'Excellent' : best[1].towers >= 5 ? 'Good' : 'Fair';
-    bestNote = `<div style="display:flex;align-items:center;gap:12px;padding:14px 18px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);border-radius:13px;margin-bottom:18px">
-      <span style="font-size:22px">🏆</span>
-      <div>
-        <div style="font-size:14px;font-weight:700;color:var(--success)">Recommended: ${best[0]}</div>
-        <div style="font-size:12px;color:var(--muted)">${strength} coverage with ${best[1].towers} cell tower${best[1].towers > 1 ? 's' : ''} detected nearby${best[1].lte ? ` (${best[1].lte} LTE` + (best[1].nr ? `, ${best[1].nr} 5G NR` : '') + ')' : ''}</div>
-      </div>
-    </div>`;
-  }
-  
-  const bars = sorted.map(([name, info]) => {
+  // Build individual carrier cards
+  const cards = sorted.map(([name, info], idx) => {
+    const style = carrierInfo[name];
     const pct = Math.round((info.towers / maxTowers) * 100);
-    const style = carrierStyles[name];
+    const isBest = idx === 0 && info.towers > 0;
+    
     const techParts = [];
-    if (info.nr)   techParts.push(`${info.nr} 5G`);
-    if (info.lte)  techParts.push(`${info.lte} LTE`);
-    if (info.umts) techParts.push(`${info.umts} 3G`);
-    const techStr = techParts.length ? ` (${techParts.join(', ')})` : '';
-    return `<div style="margin-bottom:14px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <span style="font-size:13px;font-weight:700;color:${style.color}">${style.icon} ${name}</span>
-        <span style="font-size:12px;font-weight:600;color:var(--muted)">${info.towers} tower${info.towers !== 1 ? 's' : ''}${techStr}</span>
+    if (info.nr)   techParts.push(info.nr + ' 5G');
+    if (info.lte)  techParts.push(info.lte + ' LTE');
+    if (info.umts) techParts.push(info.umts + ' 3G');
+    const techStr = techParts.join(' · ') || 'No towers detected';
+    
+    let rating = 'No Coverage';
+    let ratingColor = 'var(--dim)';
+    if (info.towers >= 10) { rating = 'Excellent'; ratingColor = 'var(--success)'; }
+    else if (info.towers >= 5) { rating = 'Good'; ratingColor = 'var(--primary)'; }
+    else if (info.towers >= 2) { rating = 'Fair'; ratingColor = 'var(--warning)'; }
+    else if (info.towers >= 1) { rating = 'Weak'; ratingColor = 'var(--orange)'; }
+    
+    return `<div style="background:${style.bg};border:1px solid ${isBest ? style.color : style.border};border-radius:15px;padding:20px;position:relative;${isBest ? 'box-shadow:0 0 20px ' + style.border + ';' : ''}">
+      ${isBest ? '<div style="position:absolute;top:-10px;right:14px;background:var(--success);color:white;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.5px">🏆 RECOMMENDED</div>' : ''}
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:42px;height:42px;border-radius:12px;background:${style.gradient};display:grid;place-items:center;font-size:20px;color:white;font-weight:900">${name.charAt(0)}</div>
+        <div>
+          <div style="font-size:16px;font-weight:800;color:${style.color}">${name}</div>
+          <div style="font-size:11px;font-weight:600;color:${ratingColor}">${rating}</div>
+        </div>
       </div>
-      <div style="height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden">
-        <div style="height:100%;width:${pct}%;background:${style.gradient};border-radius:4px;transition:width 1s ease"></div>
+      <div style="font-size:32px;font-weight:900;color:var(--text);margin-bottom:2px">${info.towers}<span style="font-size:14px;font-weight:500;color:var(--muted)"> towers</span></div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${techStr}</div>
+      <div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-bottom:14px">
+        <div style="height:100%;width:${pct}%;background:${style.gradient};border-radius:3px;transition:width 1.2s ease"></div>
       </div>
+      <a href="${style.mapUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:${style.color};text-decoration:none;opacity:.8;transition:opacity .2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.8">View coverage map ↗</a>
     </div>`;
   }).join('');
   
+  // Build recommendation text
+  let recText = '';
+  if (best[1].towers > 0) {
+    const diff2 = best[1].towers - sorted[1][1].towers;
+    const diff3 = best[1].towers - sorted[2][1].towers;
+    if (diff2 === 0) {
+      recText = best[0] + ' and ' + sorted[1][0] + ' are tied for the best coverage at this location with ' + best[1].towers + ' tower' + (best[1].towers > 1 ? 's' : '') + ' each. Either carrier would be a solid choice for a cellular backup router.';
+    } else if (diff2 <= 2) {
+      recText = best[0] + ' has a slight edge over ' + sorted[1][0] + ' at this location (' + best[1].towers + ' vs ' + sorted[1][1].towers + ' towers). Both carriers should provide reliable service here.';
+    } else {
+      recText = best[0] + ' is the clear winner at this location with ' + best[1].towers + ' tower' + (best[1].towers > 1 ? 's' : '') + ' detected — ' + diff2 + ' more than ' + sorted[1][0] + ' (' + sorted[1][1].towers + ') and ' + diff3 + ' more than ' + sorted[2][0] + ' (' + sorted[2][1].towers + '). We recommend using a ' + best[0] + ' hotspot or SIM for your backup connectivity.';
+    }
+  } else {
+    recText = 'No major US carrier cell towers were detected within range of this location. Cellular backup may not be reliable here — consider a secondary Starlink or a satellite phone for emergency connectivity.';
+  }
+
   container.innerHTML = `
-    <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px">
-      We scanned <strong style="color:var(--text)">${cellData.totalTowers} cell towers</strong> within ~2 km of this location using the OpenCelliD database.
-      ${best[1].towers > 0 ? 'Here\u2019s how the major carriers compare:' : 'No major US carrier towers were detected in this area.'}
+    <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px">
+      We scanned <strong style="color:var(--text)">${cellData.totalTowers} cell tower${cellData.totalTowers !== 1 ? 's' : ''}</strong> within ~1.8 km of this location to determine the best cellular carrier for backup connectivity.
     </p>
-    ${bestNote}
-    ${bars}
-    <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
-      <p style="font-size:11px;color:var(--dim);line-height:1.6;margin-bottom:12px">
-        📋 Verify coverage on the official carrier maps for the most up-to-date information:
-      </p>
-      <div class="cell-links">
-        <a href="https://www.verizon.com/coverage-map/" target="_blank" class="cell-btn btn-vzw">Verizon Map ↗</a>
-        <a href="https://www.att.com/maps/wireless-coverage.html" target="_blank" class="cell-btn btn-att">AT&T Map ↗</a>
-        <a href="https://www.t-mobile.com/coverage/coverage-map" target="_blank" class="cell-btn btn-tmo">T-Mobile Map ↗</a>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">${cards}</div>
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:16px 18px;background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.18);border-radius:13px">
+      <span style="font-size:20px;flex-shrink:0">💡</span>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:4px">Recommendation</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65">${recText}</div>
       </div>
     </div>`;
 }

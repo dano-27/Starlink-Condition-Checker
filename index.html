@@ -1797,6 +1797,8 @@ function setMode(mode) {
   document.getElementById('trust-strip-starlink').style.display = isCell ? 'none' : '';
   document.getElementById('trust-strip-cellular').style.display = isCell ? '' : 'none';
   document.getElementById('form-title').textContent = isCell ? '📶 Check Cellular Coverage' : '📍 Assess Your Event Site';
+  document.getElementById('form-title').style.textAlign = isCell ? 'center' : '';
+  document.getElementById('fg-loc-date').style.gridTemplateColumns = isCell ? '1fr' : '';
   document.getElementById('analyze-btn').innerHTML = isCell ? '📶 &nbsp;Run Cellular Check' : '🔍 &nbsp;Run Site Assessment';
   document.getElementById('analyze-btn').onclick = isCell ? runCellularCheck : runAnalysis;
 }

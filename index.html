@@ -959,24 +959,23 @@ async function getTerrainObstructions(lat, lon, horizonAngles) {
 ═══════════════════════════════════════════════════════ */
 const OPENCELLID_KEY = 'pk.4a7d7eb9c9ddac93c7621b7ddb0e6bb2';
 
-// US carrier MNC mapping (MCC 310, 311, 312, 313, 316)
-const CARRIER_MNC = {
-  'T-Mobile':  [260,200,210,220,230,240,250,270,310,490,530,580,660,800],
-  'AT&T':      [410,70,150,170,380,560,680,980],
-  'Verizon':   [480,481,482,483,484,485,486,487,488,489,12,4]
+// US carrier MCC+MNC mapping
+const CARRIER_MAP = {
+  'T-Mobile':  { 310: [260,200,210,220,230,240,250,270,310,490,530,580,660,800], 311: [490], 312: [250], 316: [10] },
+  'AT&T':      { 310: [410,70,150,170,380,560,680,980], 311: [180], 312: [670,680] },
+  'Verizon':   { 310: [4,5,6,10,12,350,590,820,890,910], 311: [270,271,272,273,274,275,276,277,278,279,280,281,282,283,284,285,286,287,288,289,480,481,482,483,484,485,486,487,488,489], 312: [770] }
 };
 
 function identifyCarrier(mcc, mnc) {
-  if (mcc < 310 || mcc > 316) return 'Other';
-  for (const [carrier, mncs] of Object.entries(CARRIER_MNC)) {
-    if (mncs.includes(mnc)) return carrier;
+  for (const [carrier, mccMap] of Object.entries(CARRIER_MAP)) {
+    if (mccMap[mcc] && mccMap[mcc].includes(mnc)) return carrier;
   }
   return 'Other';
 }
 
 async function getCellularCoverage(lat, lon) {
-  // Build a ~2km bounding box around the point
-  const offset = 0.01; // ~1.1km in latitude
+  // Build a ~1.8km x 1.8km bounding box (~3.2 km², under the 4 km² API limit)
+  const offset = 0.009; // ~1km in latitude
   const lonOffset = offset / Math.cos(lat * Math.PI / 180);
   const bbox = `${(lat - offset).toFixed(6)},${(lon - lonOffset).toFixed(6)},${(lat + offset).toFixed(6)},${(lon + lonOffset).toFixed(6)}`;
   
@@ -989,14 +988,15 @@ async function getCellularCoverage(lat, lon) {
     return { carriers: {}, totalTowers: 0, error: data.error || 'No data' };
   }
   
-  const carriers = { 'Verizon': { towers: 0, lte: 0, nr: 0 }, 'AT&T': { towers: 0, lte: 0, nr: 0 }, 'T-Mobile': { towers: 0, lte: 0, nr: 0 } };
+  const carriers = { 'Verizon': { towers: 0, lte: 0, nr: 0, umts: 0 }, 'AT&T': { towers: 0, lte: 0, nr: 0, umts: 0 }, 'T-Mobile': { towers: 0, lte: 0, nr: 0, umts: 0 } };
   
   data.cells.forEach(cell => {
     const carrier = identifyCarrier(cell.mcc, cell.mnc);
     if (carriers[carrier]) {
       carriers[carrier].towers++;
       if (cell.radio === 'LTE') carriers[carrier].lte++;
-      if (cell.radio === 'NR') carriers[carrier].nr++;
+      else if (cell.radio === 'NR') carriers[carrier].nr++;
+      else if (cell.radio === 'UMTS' || cell.radio === 'CDMA') carriers[carrier].umts++;
     }
   });
   
@@ -1046,8 +1046,9 @@ function renderCellularResults(cellData, lat, lon) {
     const pct = Math.round((info.towers / maxTowers) * 100);
     const style = carrierStyles[name];
     const techParts = [];
-    if (info.lte) techParts.push(`${info.lte} LTE`);
-    if (info.nr)  techParts.push(`${info.nr} 5G`);
+    if (info.nr)   techParts.push(`${info.nr} 5G`);
+    if (info.lte)  techParts.push(`${info.lte} LTE`);
+    if (info.umts) techParts.push(`${info.umts} 3G`);
     const techStr = techParts.length ? ` (${techParts.join(', ')})` : '';
     return `<div style="margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">

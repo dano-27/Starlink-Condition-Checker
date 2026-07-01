@@ -1153,6 +1153,29 @@ function renderCellularResults(cellData, lat, lon, containerId) {
     </div>`;
   }).join('');
   
+  // Coverage quality alert
+  const totalCarrierTowers = sorted.reduce((s, e) => s + e[1].towers, 0);
+  const maxCarrierTowers = best[1].towers;
+  let coverageAlert = '';
+  
+  if (totalCarrierTowers <= 3) {
+    coverageAlert = `<div style="display:flex;align-items:flex-start;gap:12px;padding:16px 18px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:13px;margin-bottom:20px">
+      <span style="font-size:22px;flex-shrink:0">⚠️</span>
+      <div>
+        <div style="font-size:14px;font-weight:800;color:#EF4444;margin-bottom:4px">Poor Cellular Coverage Area</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65">Only <strong style="color:var(--text)">${totalCarrierTowers}</strong> cell tower${totalCarrierTowers !== 1 ? 's' : ''} detected from major carriers in this area. <strong style="color:#EF4444">Cellular connectivity should not be relied upon at this location.</strong> We strongly recommend Starlink as the primary connectivity solution and suggest bringing a satellite phone for emergency backup. Conduct an on-site speed test before your event if cellular is your only option.</div>
+      </div>
+    </div>`;
+  } else if (totalCarrierTowers <= 6 || maxCarrierTowers <= 2) {
+    coverageAlert = `<div style="display:flex;align-items:flex-start;gap:12px;padding:16px 18px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:13px;margin-bottom:20px">
+      <span style="font-size:22px;flex-shrink:0">⚡</span>
+      <div>
+        <div style="font-size:14px;font-weight:800;color:#FBBF24;margin-bottom:4px">Limited Cellular Coverage</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65">Only <strong style="color:var(--text)">${totalCarrierTowers}</strong> cell towers detected nearby. Coverage may be spotty or unreliable, especially indoors or during peak usage. We recommend Starlink as your primary connection and cellular as a backup only. An on-site speed test before the event is highly recommended.</div>
+      </div>
+    </div>`;
+  }
+
   // Build recommendation text
   let recText = '';
   if (best[1].towers > 0) {
@@ -1166,13 +1189,19 @@ function renderCellularResults(cellData, lat, lon, containerId) {
       recText = best[0] + ' is the clear winner at this location with ' + best[1].towers + ' tower' + (best[1].towers > 1 ? 's' : '') + ' detected — ' + diff2 + ' more than ' + sorted[1][0] + ' (' + sorted[1][1].towers + ') and ' + diff3 + ' more than ' + sorted[2][0] + ' (' + sorted[2][1].towers + '). We recommend using a ' + best[0] + ' hotspot or SIM for your backup connectivity.';
     }
   } else {
-    recText = 'No major US carrier cell towers were detected within range of this location. Cellular backup may not be reliable here — consider a secondary Starlink or a satellite phone for emergency connectivity.';
+    recText = 'No major US carrier cell towers were detected within range of this location. Cellular connectivity is not viable here — Starlink should be your sole connectivity solution, with a satellite phone as an emergency backup.';
+  }
+  
+  // Override recommendation for very poor coverage
+  if (totalCarrierTowers <= 3 && best[1].towers > 0) {
+    recText = 'With only ' + totalCarrierTowers + ' total cell tower' + (totalCarrierTowers !== 1 ? 's' : '') + ' detected, cellular service at this location will be unreliable at best. Do not depend on cellular data for your event. Starlink should be your primary internet solution. If you must have a cellular backup, ' + best[0] + ' is the only viable option with ' + best[1].towers + ' tower' + (best[1].towers !== 1 ? 's' : '') + ' in range, but expect degraded performance.';
   }
 
   container.innerHTML = `
     <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px">
       We scanned <strong style="color:var(--text)">${cellData.totalTowers} cell tower${cellData.totalTowers !== 1 ? 's' : ''}</strong> within ~1.8 km of this location to determine the best cellular carrier for backup connectivity.
     </p>
+    ${coverageAlert}
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">${cards}</div>
     <div style="display:flex;align-items:flex-start;gap:12px;padding:16px 18px;background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.18);border-radius:13px">
       <span style="font-size:20px;flex-shrink:0">💡</span>

@@ -786,7 +786,7 @@
       <div style="display:flex;gap:18px;justify-content:center;margin-top:14px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:50%;background:#CD040B;border:2px solid white"></div><span style="font-size:12px;color:var(--muted);font-weight:600">Verizon</span></div>
         <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:50%;background:#00A8E0;border:2px solid white"></div><span style="font-size:12px;color:var(--muted);font-weight:600">AT&T</span></div>
-        <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:50%;background:#E20074;border:2px solid white"></div><span style="font-size:12px;color:var(--muted);font-weight:600">T-Mobile</span></div>
+        <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:50%;background:#8B5CF6;border:2px solid white"></div><span style="font-size:12px;color:var(--muted);font-weight:600">T-Mobile</span></div>
         <div style="display:flex;align-items:center;gap:6px"><div style="width:34px;height:12px;border-radius:6px;background:linear-gradient(135deg,#38BDF8,#818CF8)"></div><span style="font-size:12px;color:var(--muted);font-weight:600">Your Site</span></div>
       </div>
     </div>
@@ -1091,7 +1091,7 @@ function renderCellularResults(cellData, lat, lon, containerId) {
   const carrierInfo = {
     'Verizon':  { color: '#CD040B', bg: 'rgba(205,4,11,.08)', border: 'rgba(205,4,11,.25)', gradient: 'linear-gradient(135deg, #CD040B, #9E0308)', mapUrl: 'https://www.verizon.com/coverage-map/' },
     'AT&T':     { color: '#00A8E0', bg: 'rgba(0,168,224,.08)', border: 'rgba(0,168,224,.25)', gradient: 'linear-gradient(135deg, #00A8E0, #007CA6)', mapUrl: 'https://www.att.com/maps/wireless-coverage.html' },
-    'T-Mobile': { color: '#E20074', bg: 'rgba(226,0,116,.08)', border: 'rgba(226,0,116,.25)', gradient: 'linear-gradient(135deg, #E20074, #A30053)', mapUrl: 'https://www.t-mobile.com/coverage/coverage-map' }
+    'T-Mobile': { color: '#8B5CF6', bg: 'rgba(139,92,246,.08)', border: 'rgba(139,92,246,.25)', gradient: 'linear-gradient(135deg, #8B5CF6, #7C3AED)', mapUrl: 'https://www.t-mobile.com/coverage/coverage-map' }
   };
 
   if (!cellData || cellData.totalTowers === 0 || (cellData.error && !cellData.carriers)) {
@@ -1397,7 +1397,7 @@ function addTowerMarkers(map, towerLocations) {
   const colors = {
     'Verizon': '#CD040B',
     'AT&T': '#00A8E0',
-    'T-Mobile': '#E20074'
+    'T-Mobile': '#8B5CF6'
   };
   // Deduplicate by rounding to avoid stacking
   const seen = new Set();

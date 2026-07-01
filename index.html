@@ -595,6 +595,14 @@
         </div>
         <div class="lstep-status" id="lss-weather">Waiting…</div>
       </div>
+      <div class="lstep" id="ls-cellular">
+        <div class="lstep-icon">📶</div>
+        <div class="lstep-body">
+          <div class="lstep-title">Analyzing cellular backup</div>
+          <div class="lstep-desc">Scanning nearby cell towers for Verizon, AT&T & T-Mobile</div>
+        </div>
+        <div class="lstep-status" id="lss-cellular">Waiting…</div>
+      </div>
       <div class="lstep" id="ls-score">
         <div class="lstep-icon">📊</div>
         <div class="lstep-body">
@@ -696,15 +704,10 @@
     </div>
 
     <!-- Cellular Backup -->
-    <div class="card fade-up d5" style="margin-bottom:20px">
-      <div class="card-title">📶 Verify Cellular Backup Coverage</div>
-      <p style="font-size:13px; color:var(--muted); line-height:1.6">
-        If this location is high-risk for Starlink, we strongly recommend deploying a bonded cellular router. Use the links below to manually check 5G/LTE coverage at this exact location with the major carriers.
-      </p>
-      <div class="cell-links">
-        <a href="https://www.verizon.com/coverage-map/" target="_blank" class="cell-btn btn-vzw">Verizon Map ↗</a>
-        <a href="https://www.att.com/maps/wireless-coverage.html" target="_blank" class="cell-btn btn-att">AT&T Map ↗</a>
-        <a href="https://www.t-mobile.com/coverage/coverage-map" target="_blank" class="cell-btn btn-tmo">T-Mobile Map ↗</a>
+    <div class="card fade-up d5" style="margin-bottom:20px" id="cellular-card">
+      <div class="card-title">📶 Cellular Backup Analysis</div>
+      <div id="cellular-results">
+        <p style="font-size:13px; color:var(--muted); line-height:1.6">Analyzing cellular coverage…</p>
       </div>
     </div>
 
@@ -949,6 +952,131 @@ async function getTerrainObstructions(lat, lon, horizonAngles) {
     console.warn('Overpass fetch failed:', e);
     return { angles: horizonAngles, detectedVenue };
   }
+}
+
+/* ═══════════════════════════════════════════════════════
+   CELLULAR COVERAGE (OpenCelliD)
+═══════════════════════════════════════════════════════ */
+const OPENCELLID_KEY = 'pk.4a7d7eb9c9ddac93c7621b7ddb0e6bb2';
+
+// US carrier MNC mapping (MCC 310, 311, 312, 313, 316)
+const CARRIER_MNC = {
+  'T-Mobile':  [260,200,210,220,230,240,250,270,310,490,530,580,660,800],
+  'AT&T':      [410,70,150,170,380,560,680,980],
+  'Verizon':   [480,481,482,483,484,485,486,487,488,489,12,4]
+};
+
+function identifyCarrier(mcc, mnc) {
+  if (mcc < 310 || mcc > 316) return 'Other';
+  for (const [carrier, mncs] of Object.entries(CARRIER_MNC)) {
+    if (mncs.includes(mnc)) return carrier;
+  }
+  return 'Other';
+}
+
+async function getCellularCoverage(lat, lon) {
+  // Build a ~2km bounding box around the point
+  const offset = 0.01; // ~1.1km in latitude
+  const lonOffset = offset / Math.cos(lat * Math.PI / 180);
+  const bbox = `${(lat - offset).toFixed(6)},${(lon - lonOffset).toFixed(6)},${(lat + offset).toFixed(6)},${(lon + lonOffset).toFixed(6)}`;
+  
+  const url = `https://opencellid.org/cell/getInArea?key=${OPENCELLID_KEY}&BBOX=${bbox}&format=json&limit=200`;
+  
+  const res = await fetch(url);
+  const data = await res.json();
+  
+  if (data.error || !data.cells) {
+    return { carriers: {}, totalTowers: 0, error: data.error || 'No data' };
+  }
+  
+  const carriers = { 'Verizon': { towers: 0, lte: 0, nr: 0 }, 'AT&T': { towers: 0, lte: 0, nr: 0 }, 'T-Mobile': { towers: 0, lte: 0, nr: 0 } };
+  
+  data.cells.forEach(cell => {
+    const carrier = identifyCarrier(cell.mcc, cell.mnc);
+    if (carriers[carrier]) {
+      carriers[carrier].towers++;
+      if (cell.radio === 'LTE') carriers[carrier].lte++;
+      if (cell.radio === 'NR') carriers[carrier].nr++;
+    }
+  });
+  
+  return { carriers, totalTowers: data.count || data.cells.length };
+}
+
+function renderCellularResults(cellData, lat, lon) {
+  const container = document.getElementById('cellular-results');
+  
+  if (!cellData || cellData.error || cellData.totalTowers === 0) {
+    container.innerHTML = `
+      <p style="font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:16px">
+        Cell tower data is unavailable for this area. Use the links below to manually verify carrier coverage.
+      </p>
+      <div class="cell-links">
+        <a href="https://www.verizon.com/coverage-map/" target="_blank" class="cell-btn btn-vzw">Verizon Map ↗</a>
+        <a href="https://www.att.com/maps/wireless-coverage.html" target="_blank" class="cell-btn btn-att">AT&T Map ↗</a>
+        <a href="https://www.t-mobile.com/coverage/coverage-map" target="_blank" class="cell-btn btn-tmo">T-Mobile Map ↗</a>
+      </div>`;
+    return;
+  }
+  
+  const c = cellData.carriers;
+  const sorted = Object.entries(c).sort((a, b) => b[1].towers - a[1].towers);
+  const best = sorted[0];
+  const maxTowers = Math.max(1, ...sorted.map(s => s[1].towers));
+  
+  const carrierStyles = {
+    'Verizon':  { color: '#CD040B', gradient: 'linear-gradient(135deg, #CD040B, #9E0308)', icon: '🔴' },
+    'AT&T':     { color: '#00A8E0', gradient: 'linear-gradient(135deg, #00A8E0, #007CA6)', icon: '🔵' },
+    'T-Mobile': { color: '#E20074', gradient: 'linear-gradient(135deg, #E20074, #A30053)', icon: '🟣' }
+  };
+  
+  let bestNote = '';
+  if (best[1].towers > 0) {
+    const strength = best[1].towers >= 10 ? 'Excellent' : best[1].towers >= 5 ? 'Good' : 'Fair';
+    bestNote = `<div style="display:flex;align-items:center;gap:12px;padding:14px 18px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);border-radius:13px;margin-bottom:18px">
+      <span style="font-size:22px">🏆</span>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--success)">Recommended: ${best[0]}</div>
+        <div style="font-size:12px;color:var(--muted)">${strength} coverage with ${best[1].towers} cell tower${best[1].towers > 1 ? 's' : ''} detected nearby${best[1].lte ? ` (${best[1].lte} LTE` + (best[1].nr ? `, ${best[1].nr} 5G NR` : '') + ')' : ''}</div>
+      </div>
+    </div>`;
+  }
+  
+  const bars = sorted.map(([name, info]) => {
+    const pct = Math.round((info.towers / maxTowers) * 100);
+    const style = carrierStyles[name];
+    const techParts = [];
+    if (info.lte) techParts.push(`${info.lte} LTE`);
+    if (info.nr)  techParts.push(`${info.nr} 5G`);
+    const techStr = techParts.length ? ` (${techParts.join(', ')})` : '';
+    return `<div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:13px;font-weight:700;color:${style.color}">${style.icon} ${name}</span>
+        <span style="font-size:12px;font-weight:600;color:var(--muted)">${info.towers} tower${info.towers !== 1 ? 's' : ''}${techStr}</span>
+      </div>
+      <div style="height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${style.gradient};border-radius:4px;transition:width 1s ease"></div>
+      </div>
+    </div>`;
+  }).join('');
+  
+  container.innerHTML = `
+    <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px">
+      We scanned <strong style="color:var(--text)">${cellData.totalTowers} cell towers</strong> within ~2 km of this location using the OpenCelliD database.
+      ${best[1].towers > 0 ? 'Here\u2019s how the major carriers compare:' : 'No major US carrier towers were detected in this area.'}
+    </p>
+    ${bestNote}
+    ${bars}
+    <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
+      <p style="font-size:11px;color:var(--dim);line-height:1.6;margin-bottom:12px">
+        📋 Verify coverage on the official carrier maps for the most up-to-date information:
+      </p>
+      <div class="cell-links">
+        <a href="https://www.verizon.com/coverage-map/" target="_blank" class="cell-btn btn-vzw">Verizon Map ↗</a>
+        <a href="https://www.att.com/maps/wireless-coverage.html" target="_blank" class="cell-btn btn-att">AT&T Map ↗</a>
+        <a href="https://www.t-mobile.com/coverage/coverage-map" target="_blank" class="cell-btn btn-tmo">T-Mobile Map ↗</a>
+      </div>
+    </div>`;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1264,7 +1392,7 @@ function buildNextSteps(score) {
    RENDER RESULTS
 ═══════════════════════════════════════════════════════ */
 function renderResults(d) {
-  const { location, eventDate, lat, lon, elevation, satScore, terScore, wxScore, venScore, weather, horizonAngles, venueType } = d;
+  const { location, eventDate, lat, lon, elevation, satScore, terScore, wxScore, venScore, weather, horizonAngles, venueType, cellData } = d;
 
   let overall = Math.round(satScore * 0.25 + terScore * 0.35 + wxScore * 0.25 + venScore * 0.15);
   
@@ -1368,6 +1496,9 @@ function renderResults(d) {
     </div>`
   ).join('');
 
+  // Cellular results
+  renderCellularResults(cellData, lat, lon);
+
   // Show results
   document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('results-screen').style.display = 'block';
@@ -1395,7 +1526,7 @@ async function runAnalysis() {
   document.getElementById('loading-screen').style.display = 'block';
   document.getElementById('load-loc-text').textContent    = `Running assessment for "${locVal}"`;
 
-  ['geocode','satellite','terrain','weather','score'].forEach(id => setLS(id, 'waiting'));
+  ['geocode','satellite','terrain','weather','cellular','score'].forEach(id => setLS(id, 'waiting'));
   setProg(0);
 
   try {
@@ -1451,17 +1582,29 @@ async function runAnalysis() {
     }
     setLS('weather', 'done'); setProg(85); await sleep(300);
 
-    // 5. Score
+    // 5. Cellular
+    setLS('cellular', 'active');
+    document.getElementById('load-loc-text').textContent = `Scanning cell towers near ${location.shortName}…`;
+    let cellData = null;
+    try {
+      cellData = await getCellularCoverage(location.lat, location.lon);
+    } catch(e) {
+      console.warn('Cellular fallback:', e.message);
+    }
+    setLS('cellular', 'done'); setProg(90); await sleep(300);
+
+    // 6. Score
     setLS('score', 'active');
     const venScore = scoreVenue(finalVenueType);
-    await sleep(700);
+    await sleep(500);
     setLS('score', 'done'); setProg(100); await sleep(450);
 
     renderResults({
       location, eventDate: dateVal,
       lat: location.lat, lon: location.lon, elevation,
       satScore, terScore, wxScore, venScore,
-      weather, horizonAngles, venueType: finalVenueType
+      weather, horizonAngles, venueType: finalVenueType,
+      cellData
     });
 
   } catch (err) {

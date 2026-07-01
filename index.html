@@ -1070,8 +1070,8 @@ async function getCellularCoverage(lat, lon) {
   return { carriers, totalTowers: data.count || data.cells.length };
 }
 
-function renderCellularResults(cellData, lat, lon) {
-  const container = document.getElementById('cellular-results');
+function renderCellularResults(cellData, lat, lon, containerId) {
+  const container = document.getElementById(containerId || 'cellular-results');
   
   const carrierInfo = {
     'Verizon':  { color: '#CD040B', bg: 'rgba(205,4,11,.08)', border: 'rgba(205,4,11,.25)', gradient: 'linear-gradient(135deg, #CD040B, #9E0308)', mapUrl: 'https://www.verizon.com/coverage-map/' },
@@ -1762,13 +1762,8 @@ function renderCellularOnlyResults(location, cellData) {
   document.getElementById('cr-coords').textContent = location.lat.toFixed(4) + '°, ' + location.lon.toFixed(4) + '°';
   document.getElementById('cr-title').textContent = 'Cellular Coverage Report';
   document.getElementById('cr-sub').textContent = location.displayName.length > 85 ? location.displayName.slice(0, 83) + '…' : location.displayName;
-  // Reuse rendering logic targeting cellular-only container
-  const origContainer = document.getElementById('cellular-results');
-  const cellOnlyContainer = document.getElementById('cellular-only-results');
-  cellOnlyContainer.id = 'cellular-results';
-  renderCellularResults(cellData, location.lat, location.lon);
-  cellOnlyContainer.id = 'cellular-only-results';
-  origContainer.id = 'cellular-results';
+  // Render directly into the cellular-only container
+  renderCellularResults(cellData, location.lat, location.lon, 'cellular-only-results');
   document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('cellular-results-screen').style.display = 'block';
   window.scrollTo(0, 0);

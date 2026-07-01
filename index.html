@@ -1133,9 +1133,9 @@ function renderCellularResults(cellData, lat, lon, containerId) {
     let fiveGBadge = '';
     if (info.nr > 0) {
       fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">✅</span><span style="font-size:11px;font-weight:700;color:var(--success)">5G Confirmed</span><span style="font-size:10px;color:var(--muted)">(' + info.nr + ' NR tower' + (info.nr > 1 ? 's' : '') + ' detected)</span></div>';
-    } else if (info.lte >= 8) {
+    } else if (info.lte >= 5) {
       fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">📶</span><span style="font-size:11px;font-weight:700;color:var(--primary)">5G Likely</span><span style="font-size:10px;color:var(--muted)">High LTE density suggests 5G</span></div>';
-    } else if (info.lte >= 4) {
+    } else if (info.lte >= 3) {
       fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.18);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">📡</span><span style="font-size:11px;font-weight:700;color:#FBBF24">5G Possible</span><span style="font-size:10px;color:var(--muted)">Moderate LTE presence</span></div>';
     }
     

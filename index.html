@@ -1031,6 +1031,7 @@ async function getTerrainObstructions(lat, lon, horizonAngles) {
    CELLULAR COVERAGE (OpenCelliD)
 ═══════════════════════════════════════════════════════ */
 const OPENCELLID_KEY = 'pk.4a7d7eb9c9ddac93c7621b7ddb0e6bb2';
+const COVERAGEMAP_KEY = '075561175ee04c3192b153251a8ad541';
 
 // US carrier MCC+MNC mapping
 const CARRIER_MAP = {
@@ -1083,6 +1084,58 @@ async function getCellularCoverage(lat, lon) {
   });
 
   return { carriers, totalTowers: data.count || data.cells.length, towerLocations };
+}
+
+async function getCoverageMapData(lat, lon) {
+  try {
+    const res = await fetch('https://enterprise.coveragemap.com/api/v1/signal-strength/lookup?latitude=' + lat + '&longitude=' + lon, {
+      headers: { 'Authorization': 'Bearer ' + COVERAGEMAP_KEY }
+    });
+    const json = await res.json();
+    if (json.status !== 200 || !json.data) return null;
+    
+    // Parse into carrier-keyed structure
+    const result = {};
+    const nameMap = { 'Verizon': 'Verizon', 'AT&T': 'AT&T', 'T-Mobile': 'T-Mobile' };
+    json.data.forEach(entry => {
+      const name = nameMap[entry.provider.name];
+      if (!name) return;
+      if (!result[name]) result[name] = {};
+      const tech = entry.technology.code; // "5G" or "4G"
+      result[name][tech] = {
+        signal: entry.signal.signal,
+        quarterMile: entry.signal.quarterMile,
+        halfMile: entry.signal.halfMile,
+        oneMile: entry.signal.oneMile,
+        coverage: entry.coverage.quarterMile
+      };
+    });
+    return result;
+  } catch(e) {
+    console.warn('CoverageMap API error:', e.message);
+    return null;
+  }
+}
+
+function getSignalLabel(dbm) {
+  if (dbm === null || dbm === undefined) return { label: 'No Signal', color: 'var(--dim)', bars: 0 };
+  if (dbm >= -70) return { label: 'Excellent', color: 'var(--success)', bars: 5 };
+  if (dbm >= -80) return { label: 'Good', color: 'var(--success)', bars: 4 };
+  if (dbm >= -90) return { label: 'Fair', color: 'var(--primary)', bars: 3 };
+  if (dbm >= -100) return { label: 'Weak', color: 'var(--warning)', bars: 2 };
+  if (dbm >= -110) return { label: 'Very Weak', color: 'var(--orange)', bars: 1 };
+  return { label: 'No Signal', color: 'var(--dim)', bars: 0 };
+}
+
+function renderSignalBars(bars, color) {
+  let html = '<div style="display:flex;align-items:flex-end;gap:2px;height:16px">';
+  for (let i = 1; i <= 5; i++) {
+    const h = 4 + i * 2.4;
+    const active = i <= bars;
+    html += '<div style="width:4px;height:' + h + 'px;border-radius:1.5px;background:' + (active ? color : 'rgba(255,255,255,.1)') + ';transition:background .3s"></div>';
+  }
+  html += '</div>';
+  return html;
 }
 
 function renderCellularResults(cellData, lat, lon, containerId) {
@@ -1156,7 +1209,8 @@ function renderCellularResults(cellData, lat, lon, containerId) {
         </div>
       </div>
       <div style="font-size:32px;font-weight:900;color:var(--text);margin-bottom:2px">${info.towers}<span style="font-size:14px;font-weight:500;color:var(--muted)"> towers</span></div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${techStr}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">${techStr}</div>
+      ${bestSignal !== null ? '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">' + renderSignalBars(sigInfo.bars, style.color) + '<span style="font-size:11px;font-weight:700;color:' + sigInfo.color + '">' + bestSignal + ' dBm</span></div>' : '<div style="margin-bottom:12px"></div>'}
       ${fiveGBadge}
       <div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-bottom:14px">
         <div style="height:100%;width:${pct}%;background:${style.gradient};border-radius:3px;transition:width 1.2s ease"></div>
@@ -1763,7 +1817,12 @@ async function runAnalysis() {
     document.getElementById('load-loc-text').textContent = `Scanning cell towers near ${location.shortName}…`;
     let cellData = null;
     try {
-      cellData = await getCellularCoverage(location.lat, location.lon);
+      const [openCellData, cmData] = await Promise.all([
+        getCellularCoverage(location.lat, location.lon).catch(e => { console.warn('OpenCelliD error:', e.message); return null; }),
+        getCoverageMapData(location.lat, location.lon)
+      ]);
+      cellData = openCellData;
+      if (cellData) cellData.coverageMap = cmData;
     } catch(e) {
       console.warn('Cellular fallback:', e.message);
     }
@@ -1834,7 +1893,14 @@ async function runCellularCheck() {
     setLS('geocode', 'done'); setProg(35); await sleep(300);
     setLS('cellular', 'active');
     let cellData = null;
-    try { cellData = await getCellularCoverage(location.lat, location.lon); } catch(e) { console.warn('Cellular error:', e.message); }
+    try {
+      const [openCellData, cmData] = await Promise.all([
+        getCellularCoverage(location.lat, location.lon).catch(e => { console.warn('OpenCelliD error:', e.message); return null; }),
+        getCoverageMapData(location.lat, location.lon)
+      ]);
+      cellData = openCellData;
+      if (cellData) cellData.coverageMap = cmData;
+    } catch(e) { console.warn('Cellular error:', e.message); }
     setLS('cellular', 'done'); setProg(100); await sleep(400);
     renderCellularOnlyResults(location, cellData);
   } catch(err) {

@@ -1031,7 +1031,6 @@ async function getTerrainObstructions(lat, lon, horizonAngles) {
    CELLULAR COVERAGE (OpenCelliD)
 ═══════════════════════════════════════════════════════ */
 const OPENCELLID_KEY = 'pk.4a7d7eb9c9ddac93c7621b7ddb0e6bb2';
-const COVERAGEMAP_KEY = '075561175ee04c3192b153251a8ad541';
 
 // US carrier MCC+MNC mapping
 const CARRIER_MAP = {
@@ -1088,9 +1087,7 @@ async function getCellularCoverage(lat, lon) {
 
 async function getCoverageMapData(lat, lon) {
   try {
-    const res = await fetch('https://enterprise.coveragemap.com/api/v1/signal-strength/lookup?latitude=' + lat + '&longitude=' + lon, {
-      headers: { 'Authorization': 'Bearer ' + COVERAGEMAP_KEY }
-    });
+    const res = await fetch('/api/coveragemap?latitude=' + lat + '&longitude=' + lon);
     const json = await res.json();
     if (json.status !== 200 || !json.data) return null;
     

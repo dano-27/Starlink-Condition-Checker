@@ -1182,22 +1182,47 @@ function renderCellularResults(cellData, lat, lon, containerId) {
     if (info.umts) techParts.push(info.umts + ' 3G');
     const techStr = techParts.join(' · ') || 'No towers detected';
     
-    // 5G availability estimation based on LTE density
+    // CoverageMap signal data
+    const cmCarrier = cellData.coverageMap && cellData.coverageMap[name];
+    const has5G = cmCarrier && cmCarrier['5G'] && cmCarrier['5G'].coverage > 0;
+    const has4G = cmCarrier && cmCarrier['4G'] && cmCarrier['4G'].coverage > 0;
+    const bestSignal = cmCarrier ? (has5G && cmCarrier['5G'].signal ? cmCarrier['5G'].signal : (has4G && cmCarrier['4G'].signal ? cmCarrier['4G'].signal : null)) : null;
+    const sigInfo = getSignalLabel(bestSignal);
+    
+    // 5G badge: use CoverageMap if available, else fall back to LTE estimation
     let fiveGBadge = '';
-    if (info.nr > 0) {
-      fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">✅</span><span style="font-size:11px;font-weight:700;color:var(--success)">5G Confirmed</span><span style="font-size:10px;color:var(--muted)">(' + info.nr + ' NR tower' + (info.nr > 1 ? 's' : '') + ' detected)</span></div>';
-    } else if (info.lte >= 5) {
-      fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">📶</span><span style="font-size:11px;font-weight:700;color:var(--primary)">5G Likely</span><a href="' + style.mapUrl + '" target="_blank" style="font-size:10px;color:var(--primary);text-decoration:none;font-weight:600">Confirm on coverage map ↗</a></div>';
-    } else if (info.lte >= 3) {
-      fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.18);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">📡</span><span style="font-size:11px;font-weight:700;color:#FBBF24">5G Possible</span><a href="' + style.mapUrl + '" target="_blank" style="font-size:10px;color:#FBBF24;text-decoration:none;font-weight:600">Confirm on coverage map ↗</a></div>';
+    if (cmCarrier) {
+      if (has5G && cmCarrier['5G'].signal !== null) {
+        const s5g = getSignalLabel(cmCarrier['5G'].signal);
+        fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">\u2705</span><span style="font-size:11px;font-weight:700;color:var(--success)">5G Available</span><span style="font-size:10px;color:var(--muted)">' + cmCarrier['5G'].signal + ' dBm \u00b7 ' + s5g.label + '</span></div>';
+      } else if (has5G) {
+        fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">\u2705</span><span style="font-size:11px;font-weight:700;color:var(--success)">5G Available</span><span style="font-size:10px;color:var(--muted)">Coverage confirmed</span></div>';
+      } else {
+        fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">\u274c</span><span style="font-size:11px;font-weight:700;color:var(--dim)">No 5G</span><span style="font-size:10px;color:var(--dim)">4G/LTE only</span></div>';
+      }
+    } else {
+      if (info.nr > 0) {
+        fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">\u2705</span><span style="font-size:11px;font-weight:700;color:var(--success)">5G Confirmed</span><span style="font-size:10px;color:var(--muted)">(' + info.nr + ' NR tower' + (info.nr > 1 ? 's' : '') + ' detected)</span></div>';
+      } else if (info.lte >= 5) {
+        fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">\ud83d\udcf6</span><span style="font-size:11px;font-weight:700;color:var(--primary)">5G Likely</span><a href="' + style.mapUrl + '" target="_blank" style="font-size:10px;color:var(--primary);text-decoration:none;font-weight:600">Confirm on coverage map \u2197</a></div>';
+      } else if (info.lte >= 3) {
+        fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.18);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">\ud83d\udce1</span><span style="font-size:11px;font-weight:700;color:#FBBF24">5G Possible</span><a href="' + style.mapUrl + '" target="_blank" style="font-size:10px;color:#FBBF24;text-decoration:none;font-weight:600">Confirm on coverage map \u2197</a></div>';
+      }
     }
     
-    let rating = 'No Coverage';
-    let ratingColor = 'var(--dim)';
-    if (info.towers >= 10) { rating = 'Excellent'; ratingColor = 'var(--success)'; }
-    else if (info.towers >= 5) { rating = 'Good'; ratingColor = 'var(--primary)'; }
-    else if (info.towers >= 2) { rating = 'Fair'; ratingColor = 'var(--warning)'; }
-    else if (info.towers >= 1) { rating = 'Weak'; ratingColor = 'var(--orange)'; }
+    // Rating from signal strength if available, else tower count
+    let rating, ratingColor;
+    if (bestSignal !== null) {
+      rating = sigInfo.label;
+      ratingColor = sigInfo.color;
+    } else {
+      rating = 'No Coverage';
+      ratingColor = 'var(--dim)';
+      if (info.towers >= 10) { rating = 'Excellent'; ratingColor = 'var(--success)'; }
+      else if (info.towers >= 5) { rating = 'Good'; ratingColor = 'var(--primary)'; }
+      else if (info.towers >= 2) { rating = 'Fair'; ratingColor = 'var(--warning)'; }
+      else if (info.towers >= 1) { rating = 'Weak'; ratingColor = 'var(--orange)'; }
+    }
     
     const signalHtml = bestSignal !== null ? '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">' + renderSignalBars(sigInfo.bars, style.color) + '<span style="font-size:11px;font-weight:700;color:' + sigInfo.color + '">' + bestSignal + ' dBm</span></div>' : '<div style="margin-bottom:12px"></div>';
 

@@ -1172,31 +1172,54 @@ function renderSignalRangeChart(cmCarrier, color) {
 
 function renderCoverageReliability(cmCarrier, color) {
   if (!cmCarrier) return '';
-  // Average the quarter-mile coverage across available techs
-  let coverages = [];
-  if (cmCarrier['5G'] && cmCarrier['5G'].coverage !== undefined) coverages.push(cmCarrier['5G'].coverage);
-  if (cmCarrier['4G'] && cmCarrier['4G'].coverage !== undefined) coverages.push(cmCarrier['4G'].coverage);
-  if (coverages.length === 0) return '';
   
-  const avgCov = coverages.reduce((a, b) => a + b, 0) / coverages.length;
-  const pct = Math.round(avgCov * 100);
+  // Pick best tech available
+  const tech5G = cmCarrier['5G'];
+  const tech4G = cmCarrier['4G'];
+  const best = (tech5G && tech5G.signal !== null) ? tech5G : ((tech4G && tech4G.signal !== null) ? tech4G : null);
+  if (!best) return '';
+  
+  // Gather all available signal readings across the area
+  const signals = [best.signal, best.quarterMile, best.halfMile, best.oneMile].filter(s => s !== null && s !== undefined);
+  if (signals.length === 0) return '';
+  
+  const avgSignal = signals.reduce((a, b) => a + b, 0) / signals.length;
+  const worstSignal = Math.min(...signals);
+  const signalDrop = Math.abs(best.signal - worstSignal);
+  
+  // Coverage area factor (0-1)
+  const covFactor = Math.max(
+    (tech5G && tech5G.coverage !== undefined) ? tech5G.coverage : 0,
+    (tech4G && tech4G.coverage !== undefined) ? tech4G.coverage : 0
+  );
+  
+  // Score components (each 0-100):
+  // 1. Signal strength: -60 dBm = 100, -110 dBm = 0
+  const strengthScore = Math.max(0, Math.min(100, ((avgSignal + 110) / 50) * 100));
+  // 2. Consistency: <5 dBm drop = 100, >20 dBm drop = 0
+  const consistencyScore = Math.max(0, Math.min(100, ((20 - signalDrop) / 20) * 100));
+  // 3. Coverage presence
+  const coverageScore = covFactor * 100;
+  
+  // Weighted: signal strength is king
+  const score = Math.round(strengthScore * 0.55 + consistencyScore * 0.25 + coverageScore * 0.20);
   
   let label, labelColor, icon;
-  if (pct >= 90) { label = 'Reliable'; labelColor = 'var(--success)'; icon = '🟢'; }
-  else if (pct >= 60) { label = 'Moderate'; labelColor = 'var(--primary)'; icon = '🔵'; }
-  else if (pct >= 30) { label = 'Spotty'; labelColor = 'var(--warning)'; icon = '🟡'; }
-  else if (pct > 0) { label = 'Unreliable'; labelColor = 'var(--orange)'; icon = '🟠'; }
-  else { label = 'No Coverage'; labelColor = 'var(--dim)'; icon = '🔴'; }
+  if (score >= 80) { label = 'Reliable'; labelColor = 'var(--success)'; icon = '\u{1F7E2}'; }
+  else if (score >= 60) { label = 'Good'; labelColor = 'var(--primary)'; icon = '\u{1F535}'; }
+  else if (score >= 40) { label = 'Fair'; labelColor = 'var(--warning)'; icon = '\u{1F7E1}'; }
+  else if (score >= 20) { label = 'Weak'; labelColor = 'var(--orange)'; icon = '\u{1F7E0}'; }
+  else { label = 'Poor'; labelColor = '#EF4444'; icon = '\u{1F534}'; }
   
   return '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:9px;margin-bottom:12px">' +
     '<span style="font-size:12px">' + icon + '</span>' +
     '<div style="flex:1">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">' +
         '<span style="font-size:9px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Coverage Reliability</span>' +
-        '<span style="font-size:11px;font-weight:800;color:' + labelColor + '">' + pct + '% · ' + label + '</span>' +
+        '<span style="font-size:11px;font-weight:800;color:' + labelColor + '">' + score + '/100 \u00b7 ' + label + '</span>' +
       '</div>' +
       '<div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden">' +
-        '<div style="height:100%;width:' + pct + '%;background:' + color + ';border-radius:2px;transition:width 1s ease"></div>' +
+        '<div style="height:100%;width:' + score + '%;background:' + color + ';border-radius:2px;transition:width 1s ease"></div>' +
       '</div>' +
     '</div>' +
   '</div>';

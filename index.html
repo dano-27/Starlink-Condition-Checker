@@ -1234,7 +1234,16 @@ function renderCellularResults(cellData, lat, lon, containerId) {
     'T-Mobile': { color: '#8B5CF6', bg: 'rgba(139,92,246,.08)', border: 'rgba(139,92,246,.25)', gradient: 'linear-gradient(135deg, #8B5CF6, #7C3AED)', mapUrl: 'https://www.t-mobile.com/coverage/coverage-map' }
   };
 
-  if (!cellData || cellData.totalTowers === 0 || (cellData.error && !cellData.carriers)) {
+  // If OpenCelliD returned no towers but CoverageMap has data, build carriers from CoverageMap
+  const hasCmData = cellData && cellData.coverageMap && Object.keys(cellData.coverageMap).length > 0;
+  if (cellData && cellData.totalTowers === 0 && hasCmData) {
+    // Populate carrier data from CoverageMap so the rest of the render works
+    Object.keys(carrierInfo).forEach(name => {
+      if (!cellData.carriers[name]) cellData.carriers[name] = { towers: 0, lte: 0, nr: 0, umts: 0 };
+    });
+  }
+
+  if ((!cellData || (cellData.totalTowers === 0 && !hasCmData) || (cellData.error && !cellData.carriers))) {
     const cards = Object.entries(carrierInfo).map(([name, style]) => `
       <div style="background:${style.bg};border:1px solid ${style.border};border-radius:15px;padding:20px;text-align:center">
         <div style="font-size:28px;margin-bottom:8px">📡</div>
@@ -1845,7 +1854,7 @@ function renderResults(d) {
   ).join('');
 
   // Cellular results
-  renderCellularResults(cellData, lat, lon);
+  try { renderCellularResults(cellData, lat, lon); } catch(e) { console.error('Cellular render error:', e); }
 
   // Show results
   document.getElementById('loading-screen').style.display = 'none';

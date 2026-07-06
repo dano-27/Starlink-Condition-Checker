@@ -1199,6 +1199,8 @@ function renderCellularResults(cellData, lat, lon, containerId) {
     else if (info.towers >= 2) { rating = 'Fair'; ratingColor = 'var(--warning)'; }
     else if (info.towers >= 1) { rating = 'Weak'; ratingColor = 'var(--orange)'; }
     
+    const signalHtml = bestSignal !== null ? '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">' + renderSignalBars(sigInfo.bars, style.color) + '<span style="font-size:11px;font-weight:700;color:' + sigInfo.color + '">' + bestSignal + ' dBm</span></div>' : '<div style="margin-bottom:12px"></div>';
+
     return `<div style="background:${style.bg};border:1px solid ${isBest ? style.color : style.border};border-radius:15px;padding:20px;position:relative;${isBest ? 'box-shadow:0 0 20px ' + style.border + ';' : ''}">
       ${isBest ? '<div style="position:absolute;top:-10px;right:14px;background:var(--success);color:white;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.5px">🏆 RECOMMENDED</div>' : ''}
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">

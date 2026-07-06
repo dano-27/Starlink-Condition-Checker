@@ -1087,7 +1087,7 @@ async function getCellularCoverage(lat, lon) {
 
 async function getCoverageMapData(lat, lon) {
   try {
-    const res = await fetch('/api/coveragemap?latitude=' + lat + '&longitude=' + lon);
+    const res = await fetch(`/api/coveragemap?latitude=${lat}&longitude=${lon}`);
     const json = await res.json();
     if (json.status !== 200 || !json.data) return null;
     

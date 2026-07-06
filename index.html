@@ -1135,6 +1135,73 @@ function renderSignalBars(bars, color) {
   return html;
 }
 
+function renderSignalRangeChart(cmCarrier, color) {
+  if (!cmCarrier) return '';
+  // Use the best available tech (5G if available, else 4G)
+  const tech = (cmCarrier['5G'] && cmCarrier['5G'].signal !== null) ? cmCarrier['5G'] : (cmCarrier['4G'] || null);
+  if (!tech || tech.signal === null) return '';
+  
+  const points = [
+    { label: 'Here', dbm: tech.signal },
+    { label: '¼ mi', dbm: tech.quarterMile },
+    { label: '½ mi', dbm: tech.halfMile },
+    { label: '1 mi', dbm: tech.oneMile }
+  ].filter(p => p.dbm !== null);
+  
+  if (points.length < 2) return '';
+  
+  // Map dBm to bar height (higher = better, -60 best, -120 worst)
+  const minDbm = -120, maxDbm = -60;
+  const barMax = 36;
+  
+  let barsHtml = points.map(p => {
+    const pct = Math.max(0, Math.min(1, (p.dbm - minDbm) / (maxDbm - minDbm)));
+    const h = Math.max(4, Math.round(pct * barMax));
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1">' +
+      '<span style="font-size:8px;color:var(--muted);font-weight:600">' + p.dbm + '</span>' +
+      '<div style="width:100%;height:' + h + 'px;border-radius:3px;background:' + color + ';opacity:' + (0.4 + pct * 0.6).toFixed(2) + '"></div>' +
+      '<span style="font-size:8px;color:var(--dim)">' + p.label + '</span>' +
+    '</div>';
+  }).join('');
+  
+  return '<div style="margin-bottom:12px;padding:10px 12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:9px">' +
+    '<div style="font-size:9px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Signal Range</div>' +
+    '<div style="display:flex;align-items:flex-end;gap:4px">' + barsHtml + '</div>' +
+  '</div>';
+}
+
+function renderCoverageReliability(cmCarrier, color) {
+  if (!cmCarrier) return '';
+  // Average the quarter-mile coverage across available techs
+  let coverages = [];
+  if (cmCarrier['5G'] && cmCarrier['5G'].coverage !== undefined) coverages.push(cmCarrier['5G'].coverage);
+  if (cmCarrier['4G'] && cmCarrier['4G'].coverage !== undefined) coverages.push(cmCarrier['4G'].coverage);
+  if (coverages.length === 0) return '';
+  
+  const avgCov = coverages.reduce((a, b) => a + b, 0) / coverages.length;
+  const pct = Math.round(avgCov * 100);
+  
+  let label, labelColor, icon;
+  if (pct >= 90) { label = 'Reliable'; labelColor = 'var(--success)'; icon = '🟢'; }
+  else if (pct >= 60) { label = 'Moderate'; labelColor = 'var(--primary)'; icon = '🔵'; }
+  else if (pct >= 30) { label = 'Spotty'; labelColor = 'var(--warning)'; icon = '🟡'; }
+  else if (pct > 0) { label = 'Unreliable'; labelColor = 'var(--orange)'; icon = '🟠'; }
+  else { label = 'No Coverage'; labelColor = 'var(--dim)'; icon = '🔴'; }
+  
+  return '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:9px;margin-bottom:12px">' +
+    '<span style="font-size:12px">' + icon + '</span>' +
+    '<div style="flex:1">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">' +
+        '<span style="font-size:9px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Coverage Reliability</span>' +
+        '<span style="font-size:11px;font-weight:800;color:' + labelColor + '">' + pct + '% · ' + label + '</span>' +
+      '</div>' +
+      '<div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden">' +
+        '<div style="height:100%;width:' + pct + '%;background:' + color + ';border-radius:2px;transition:width 1s ease"></div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
 function renderCellularResults(cellData, lat, lon, containerId) {
   const container = document.getElementById(containerId || 'cellular-results');
   
@@ -1222,6 +1289,8 @@ function renderCellularResults(cellData, lat, lon, containerId) {
     }
     
     const signalHtml = bestSignal !== null ? '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">' + renderSignalBars(sigInfo.bars, style.color) + '<span style="font-size:11px;font-weight:700;color:' + sigInfo.color + '">' + bestSignal + ' dBm</span></div>' : '<div style="margin-bottom:12px"></div>';
+    const rangeHtml = renderSignalRangeChart(cmCarrier, style.color);
+    const reliabilityHtml = renderCoverageReliability(cmCarrier, style.color);
 
     return `<div style="background:${style.bg};border:1px solid ${isBest ? style.color : style.border};border-radius:15px;padding:20px;position:relative;${isBest ? 'box-shadow:0 0 20px ' + style.border + ';' : ''}">
       ${isBest ? '<div style="position:absolute;top:-10px;right:14px;background:var(--success);color:white;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.5px">🏆 RECOMMENDED</div>' : ''}
@@ -1236,6 +1305,8 @@ function renderCellularResults(cellData, lat, lon, containerId) {
       <div style="font-size:12px;color:var(--muted);margin-bottom:6px">${techStr}</div>
       ${signalHtml}
       ${fiveGBadge}
+      ${reliabilityHtml}
+      ${rangeHtml}
       <div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-bottom:14px">
         <div style="height:100%;width:${pct}%;background:${style.gradient};border-radius:3px;transition:width 1.2s ease"></div>
       </div>

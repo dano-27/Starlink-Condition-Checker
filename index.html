@@ -469,6 +469,126 @@
     @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
 
     /* ═══════════════════════════════════════════
+       HOW IT WORKS
+    ═══════════════════════════════════════════ */
+    .hiw-section {
+      max-width: 900px; margin: 0 auto; padding: 80px 24px 60px;
+    }
+    .hiw-header {
+      text-align: center; margin-bottom: 52px;
+    }
+    .hiw-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(49,102,174,.06); border: 1px solid rgba(49,102,174,.15);
+      color: #3166AE; padding: 5px 14px; border-radius: 30px;
+      font-size: 12px; font-weight: 700; letter-spacing: .5px;
+      text-transform: uppercase; margin-bottom: 16px;
+    }
+    .hiw-badge .hiw-dot {
+      width: 6px; height: 6px; background: #F59231;
+      border-radius: 50%;
+    }
+    .hiw-header h2 {
+      font-size: clamp(26px, 4vw, 36px); font-weight: 800;
+      letter-spacing: -1px; margin-bottom: 12px; color: var(--text);
+    }
+    .hiw-header p {
+      font-size: 16px; color: var(--muted); line-height: 1.7;
+      max-width: 560px; margin: 0 auto;
+    }
+
+    /* Steps */
+    .hiw-steps {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+      position: relative; margin-bottom: 56px;
+    }
+    .hiw-steps::before {
+      content: ''; position: absolute; top: 36px;
+      left: calc(16.66% + 20px); right: calc(16.66% + 20px);
+      height: 2px; background: #EEEEEE;
+    }
+    .hiw-step {
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; position: relative; padding: 0 12px;
+    }
+    .hiw-step-num {
+      width: 72px; height: 72px; border-radius: 50%;
+      display: grid; place-items: center;
+      font-size: 28px; margin-bottom: 20px;
+      position: relative; z-index: 1;
+    }
+    .hiw-step-num.s1 { background: rgba(49,102,174,.08); }
+    .hiw-step-num.s2 { background: rgba(245,146,49,.08); }
+    .hiw-step-num.s3 { background: rgba(5,172,63,.08); }
+    .hiw-step h3 {
+      font-size: 16px; font-weight: 700; margin-bottom: 8px;
+      color: var(--text);
+    }
+    .hiw-step p {
+      font-size: 13px; color: var(--muted); line-height: 1.6;
+      max-width: 220px;
+    }
+
+    /* Detail cards */
+    .hiw-details {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+      margin-bottom: 40px;
+    }
+    .hiw-detail {
+      background: #FAFAFA; border: 1px solid rgba(0,0,0,.06);
+      border-radius: 16px; padding: 24px;
+      transition: box-shadow .25s, transform .25s;
+    }
+    .hiw-detail:hover {
+      box-shadow: 0 4px 20px rgba(0,0,0,.06);
+      transform: translateY(-2px);
+    }
+    .hiw-detail-icon {
+      width: 42px; height: 42px; border-radius: 12px;
+      display: grid; place-items: center;
+      font-size: 20px; margin-bottom: 14px;
+    }
+    .hiw-detail h4 {
+      font-size: 14px; font-weight: 700; margin-bottom: 6px;
+      color: var(--text);
+    }
+    .hiw-detail p {
+      font-size: 13px; color: var(--muted); line-height: 1.65;
+    }
+    .hiw-detail .hiw-source {
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-top: 10px; font-size: 10px; font-weight: 600;
+      color: #3166AE; background: rgba(49,102,174,.06);
+      padding: 3px 8px; border-radius: 6px;
+    }
+
+    .hiw-cta {
+      text-align: center; padding-top: 8px;
+    }
+    .hiw-cta-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #FCD230; color: #232428;
+      border: none; border-radius: 40px;
+      padding: 14px 32px; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: all .2s;
+      font-family: var(--font);
+    }
+    .hiw-cta-btn:hover {
+      background: #F3C100;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(252,210,48,.3);
+    }
+    .hiw-cta-sub {
+      font-size: 12px; color: var(--muted); margin-top: 10px;
+    }
+
+    @media(max-width:700px) {
+      .hiw-steps { grid-template-columns: 1fr; gap: 32px; }
+      .hiw-steps::before { display: none; }
+      .hiw-details { grid-template-columns: 1fr; }
+    }
+
+    /* ═══════════════════════════════════════════
        RESPONSIVE
     ═══════════════════════════════════════════ */
     @media(max-width:900px) {
@@ -503,7 +623,7 @@
       <span class="logo-chip">Site Checker</span>
     </a>
     <div class="nav-links">
-      <a href="#">How It Works</a>
+      <a href="#how-it-works">How It Works</a>
       <a href="#">About Fello</a>
       <a href="#" class="nav-cta">Rent a Starlink →</a>
     </div>
@@ -576,6 +696,66 @@
         <span>⚡ Results in ~10 sec</span>
       </div>
     </div>
+
+    <!-- ═══ HOW IT WORKS ═══ -->
+    <div class="hiw-section" id="how-it-works">
+      <div class="hiw-header">
+        <div class="hiw-badge"><div class="hiw-dot"></div> How It Works</div>
+        <h2>Site intelligence in<br>three simple steps</h2>
+        <p>No equipment, no site visits, no guesswork. Just enter your event address and we'll tell you exactly what to expect.</p>
+      </div>
+
+      <div class="hiw-steps">
+        <div class="hiw-step">
+          <div class="hiw-step-num s1">📍</div>
+          <h3>Enter your address</h3>
+          <p>Type in your event venue address and date. We'll pinpoint the exact GPS coordinates.</p>
+        </div>
+        <div class="hiw-step">
+          <div class="hiw-step-num s2">🔍</div>
+          <h3>We scan the location</h3>
+          <p>Our system checks satellites, terrain, weather forecasts, and cell tower coverage in seconds.</p>
+        </div>
+        <div class="hiw-step">
+          <div class="hiw-step-num s3">✅</div>
+          <h3>Get your report</h3>
+          <p>Receive a clear readiness score with plain-English recommendations for your event.</p>
+        </div>
+      </div>
+
+      <div class="hiw-details">
+        <div class="hiw-detail">
+          <div class="hiw-detail-icon" style="background:rgba(49,102,174,.08)">🛰️</div>
+          <h4>Satellite Coverage</h4>
+          <p>We check whether Starlink satellites can reach your location based on its latitude and the current orbital constellation.</p>
+          <div class="hiw-source">📡 Live orbital data</div>
+        </div>
+        <div class="hiw-detail">
+          <div class="hiw-detail-icon" style="background:rgba(245,146,49,.08)">🏔️</div>
+          <h4>Terrain & Obstructions</h4>
+          <p>We scan the elevation in 16 directions around your venue to detect hills, mountains, or tall buildings that could block the satellite signal.</p>
+          <div class="hiw-source">🌍 NASA elevation data</div>
+        </div>
+        <div class="hiw-detail">
+          <div class="hiw-detail-icon" style="background:rgba(252,210,48,.10)">🌦️</div>
+          <h4>Weather Forecast</h4>
+          <p>Heavy rain and thick cloud cover can weaken satellite signals. We pull the forecast for your event date so you know what to expect.</p>
+          <div class="hiw-source">☁️ 16-day weather forecast</div>
+        </div>
+        <div class="hiw-detail">
+          <div class="hiw-detail-icon" style="background:rgba(5,172,63,.08)">📶</div>
+          <h4>Cellular Analysis</h4>
+          <p>We check real signal strength from Verizon, AT&amp;T, and T-Mobile at your exact coordinates — not just coverage maps, but actual dBm readings.</p>
+          <div class="hiw-source">📊 FCC broadband data + tower locations</div>
+        </div>
+      </div>
+
+      <div class="hiw-cta">
+        <button class="hiw-cta-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})">Try It Now — It's Free →</button>
+        <p class="hiw-cta-sub">No sign-up required · Results in ~30 seconds</p>
+      </div>
+    </div>
+
   </div>
 
   <!-- ═══════════════════════════════════════════

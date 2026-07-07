@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
@@ -16,23 +16,23 @@
        DESIGN TOKENS
     ═══════════════════════════════════════════ */
     :root {
-      --bg:           #030B1A;
-      --bg2:          #050F22;
-      --surface:      #0C1832;
-      --surface2:     #111D3A;
-      --border:       rgba(99,179,237,0.10);
-      --border-hi:    rgba(99,179,237,0.25);
-      --primary:      #38BDF8;
-      --primary-dim:  rgba(56,189,248,0.12);
-      --secondary:    #818CF8;
-      --success:      #34D399;
-      --warning:      #FBBF24;
-      --danger:       #F87171;
-      --orange:       #FB923C;
-      --text:         #E2E8F0;
-      --muted:        #94A3B8;
-      --dim:          #475569;
-      --font:         'Inter', sans-serif;
+      --bg:           #1A1B1F;
+      --bg2:          #1E1F23;
+      --surface:      #2A2B30;
+      --surface2:     #333439;
+      --border:       rgba(255,255,255,0.08);
+      --border-hi:    rgba(252,210,48,0.30);
+      --primary:      #3166AE;
+      --primary-dim:  rgba(49,102,174,0.15);
+      --secondary:    #F59231;
+      --success:      #05AC3F;
+      --warning:      #F59231;
+      --danger:       #FF4D41;
+      --orange:       #F59231;
+      --text:         #FFFFFF;
+      --muted:        #A8A7A7;
+      --dim:          #636363;
+      --font:         'Montserrat', sans-serif;
       --radius:       20px;
     }
 
@@ -67,20 +67,20 @@
       padding: 18px 40px;
       border-bottom: 1px solid var(--border);
       backdrop-filter: blur(20px);
-      background: rgba(3,11,26,0.7);
+      background: rgba(26,27,31,0.85);
       position: sticky; top: 0; z-index: 100;
     }
     .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .logo-mark {
       width: 38px; height: 38px;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      background: linear-gradient(135deg, #FCD230, #F59231);
       border-radius: 11px;
       display: grid; place-items: center; font-size: 20px;
-      box-shadow: 0 0 20px rgba(56,189,248,0.3);
+      box-shadow: 0 0 20px rgba(252,210,48,0.25);
     }
     .logo-name {
       font-size: 22px; font-weight: 900; letter-spacing: -0.5px;
-      background: linear-gradient(120deg, #fff 30%, var(--primary));
+      background: linear-gradient(120deg, #fff 30%, #FCD230);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
     .logo-chip {
@@ -92,9 +92,9 @@
     .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: color .2s; }
     .nav-links a:hover { color: var(--text); }
     .nav-cta {
-      background: linear-gradient(135deg, var(--primary), var(--secondary)) !important;
-      color: white !important; padding: 8px 18px !important;
-      border-radius: 9px; font-weight: 700 !important; font-size: 13px !important;
+      background: #FCD230 !important;
+      color: #232428 !important; padding: 8px 18px !important;
+      border-radius: 40px; font-weight: 700 !important; font-size: 13px !important;
     }
 
     /* ═══════════════════════════════════════════
@@ -124,7 +124,7 @@
       font-size: clamp(38px, 6vw, 68px); font-weight: 900;
       letter-spacing: -2px; line-height: 1.08; margin-bottom: 22px;
     }
-    .grad { background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .grad { background: linear-gradient(135deg, #FCD230, #F59231); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .hero p { font-size: 18px; color: var(--muted); line-height: 1.75; max-width: 580px; margin: 0 auto 52px; }
 
     /* Trust strip */
@@ -139,23 +139,23 @@
     ═══════════════════════════════════════════ */
     .form-wrap { max-width: 680px; margin: 0 auto; padding: 0 20px 80px; }
     .form-card {
-      background: rgba(12,24,50,0.85);
+      background: rgba(42,43,48,0.90);
       border: 1px solid var(--border);
       border-radius: 26px; padding: 40px;
       backdrop-filter: blur(24px);
-      box-shadow: 0 30px 90px rgba(0,0,0,.55), 0 0 0 1px rgba(56,189,248,.04);
+      box-shadow: 0 30px 90px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04);
     }
     .form-card-title { font-size: 17px; font-weight: 700; margin-bottom: 28px; display: flex; align-items: center; gap: 10px; }
 
     .fg { margin-bottom: 22px; }
     label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; }
     input[type=text], input[type=date] {
-      width: 100%; background: rgba(5,15,34,.9);
+      width: 100%; background: rgba(30,31,35,.9);
       border: 1px solid var(--border); border-radius: 13px;
       padding: 14px 18px; font-size: 15px; font-family: var(--font);
       color: var(--text); outline: none; transition: border-color .2s, box-shadow .2s;
     }
-    input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(56,189,248,.12); }
+    input:focus { border-color: #FCD230; box-shadow: 0 0 0 3px rgba(252,210,48,.15); }
     input::placeholder { color: var(--dim); }
     input[type=date]::-webkit-calendar-picker-indicator { filter: invert(.5); cursor: pointer; }
 
@@ -164,19 +164,19 @@
     /* Venue type buttons */
     .venue-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
     .vbtn {
-      background: rgba(5,15,34,.9); border: 1px solid var(--border);
+      background: rgba(30,31,35,.9); border: 1px solid var(--border);
       border-radius: 13px; padding: 14px 10px; cursor: pointer;
       text-align: center; transition: all .2s;
       color: var(--muted); font-size: 12px; font-weight: 700;
     }
     .vbtn .vi { font-size: 24px; display: block; margin-bottom: 5px; }
-    .vbtn:hover { border-color: var(--border-hi); color: var(--text); background: rgba(56,189,248,.05); }
-    .vbtn.active { border-color: var(--primary); background: var(--primary-dim); color: var(--primary); }
+    .vbtn:hover { border-color: var(--border-hi); color: var(--text); background: rgba(252,210,48,.06); }
+    .vbtn.active { border-color: #FCD230; background: rgba(252,210,48,.12); color: #FCD230; }
 
     /* Error banner */
     .err-bar {
       display: none; align-items: center; gap: 10px;
-      background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.3);
+      background: rgba(255,77,65,.1); border: 1px solid rgba(255,77,65,.3);
       border-radius: 12px; padding: 13px 18px; margin-top: 16px;
       font-size: 13px; color: var(--danger);
     }
@@ -185,13 +185,13 @@
     /* Submit button */
     .submit-btn {
       width: 100%; margin-top: 28px;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      background: linear-gradient(135deg, #FCD230, #F59231);
       border: none; border-radius: 15px; padding: 17px 24px;
       font-size: 16px; font-weight: 800; color: white;
       display: flex; align-items: center; justify-content: center; gap: 10px;
       letter-spacing: -.2px; transition: all .2s;
     }
-    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 35px rgba(56,189,248,.3); }
+    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 35px rgba(252,210,48,.3); background: #F3C100; }
     .submit-btn:active { transform: translateY(0); }
 
     /* ═══════════════════════════════════════════
@@ -208,14 +208,14 @@
       animation: spin 2.8s linear infinite;
     }
     .orbit-dot {
-      width: 13px; height: 13px; background: var(--primary);
+      width: 13px; height: 13px; background: #FCD230;
       border-radius: 50%; position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
-      box-shadow: 0 0 16px var(--primary), 0 0 5px var(--primary);
+      box-shadow: 0 0 16px #FCD230, 0 0 5px #FCD230;
     }
     .orbit-core {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
       width: 82px; height: 82px;
-      background: linear-gradient(135deg,rgba(56,189,248,.15),rgba(129,140,248,.15));
+      background: linear-gradient(135deg,rgba(252,210,48,.15),rgba(245,146,49,.15));
       border: 1px solid var(--border-hi); border-radius: 50%;
       display: grid; place-items: center; font-size: 34px;
     }
@@ -229,27 +229,27 @@
     .lstep {
       display: flex; align-items: center; gap: 16px;
       padding: 16px 20px;
-      background: rgba(12,24,50,.85); border: 1px solid var(--border);
+      background: rgba(42,43,48,.85); border: 1px solid var(--border);
       border-radius: 15px; transition: all .35s;
     }
-    .lstep.active { border-color: var(--primary); background: rgba(56,189,248,.08); }
-    .lstep.done  { border-color: var(--success);  background: rgba(52,211,153,.08); }
+    .lstep.active { border-color: #FCD230; background: rgba(252,210,48,.08); }
+    .lstep.done  { border-color: var(--success);  background: rgba(5,172,63,.08); }
     .lstep-icon {
       width: 38px; height: 38px; border-radius: 11px;
       background: var(--surface2); display: grid; place-items: center;
       font-size: 18px; flex-shrink: 0; transition: background .35s;
     }
-    .lstep.active .lstep-icon { background: rgba(56,189,248,.15); }
-    .lstep.done  .lstep-icon { background: rgba(52,211,153,.15); }
+    .lstep.active .lstep-icon { background: rgba(252,210,48,.15); }
+    .lstep.done  .lstep-icon { background: rgba(5,172,63,.15); }
     .lstep-body { flex: 1; }
     .lstep-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
     .lstep-desc  { font-size: 12px; color: var(--muted); }
     .lstep-status { font-size: 12px; font-weight: 600; flex-shrink: 0; color: var(--dim); }
-    .lstep.active .lstep-status { color: var(--primary); }
+    .lstep.active .lstep-status { color: #FCD230; }
     .lstep.done  .lstep-status { color: var(--success); }
 
     .prog-wrap { margin-top: 36px; background: var(--surface); border-radius: 4px; height: 4px; overflow: hidden; }
-    .prog-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border-radius: 4px; transition: width .5s ease; width: 0%; }
+    .prog-fill { height: 100%; background: linear-gradient(90deg, #FCD230, #F59231); border-radius: 4px; transition: width .5s ease; width: 0%; }
 
     /* ═══════════════════════════════════════════
        RESULTS SCREEN
@@ -260,7 +260,7 @@
     .loc-bar {
       display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
       padding: 14px 22px;
-      background: rgba(12,24,50,.75); border: 1px solid var(--border);
+      background: rgba(42,43,48,.75); border: 1px solid var(--border);
       border-radius: 14px; margin-bottom: 28px;
       backdrop-filter: blur(16px);
     }
@@ -273,7 +273,7 @@
       color: var(--text); padding: 8px 16px; border-radius: 9px;
       font-size: 13px; font-weight: 600; transition: all .2s;
     }
-    .new-btn:hover { background: var(--primary-dim); color: var(--primary); border-color: var(--primary); }
+    .new-btn:hover { background: rgba(252,210,48,.12); color: #FCD230; border-color: #FCD230; }
 
     /* Results header */
     .res-hdr { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; gap: 16px; flex-wrap: wrap; }
@@ -289,16 +289,16 @@
     }
     .btn-outline:hover { background: var(--primary-dim); color: var(--primary); border-color: var(--primary); }
     .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      background: linear-gradient(135deg, #FCD230, #F59231);
       border: none; color: white; padding: 9px 17px; border-radius: 10px;
       font-size: 13px; font-weight: 700; display: flex; align-items: center;
       gap: 7px; transition: all .2s;
     }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(56,189,248,.28); }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(252,210,48,.28); }
 
     /* Card base */
     .card {
-      background: rgba(12,24,50,.88); border: 1px solid var(--border);
+      background: rgba(42,43,48,.88); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 28px;
       backdrop-filter: blur(20px);
     }
@@ -330,7 +330,7 @@
     /* Metric cards */
     .metrics-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; margin-bottom: 20px; }
     .metric-card {
-      background: rgba(12,24,50,.88); border: 1px solid var(--border);
+      background: rgba(42,43,48,.88); border: 1px solid var(--border);
       border-radius: 18px; padding: 24px;
       backdrop-filter: blur(20px); position: relative; overflow: hidden;
     }
@@ -347,8 +347,8 @@
     .mc-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
     .mc-badge { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
 
-    .mc-excellent .mc-badge { background: rgba(52,211,153,.15); color: var(--success); }
-    .mc-good      .mc-badge { background: rgba(56,189,248,.15); color: var(--primary); }
+    .mc-excellent .mc-badge { background: rgba(5,172,63,.15); color: var(--success); }
+    .mc-good      .mc-badge { background: rgba(49,102,174,.15); color: var(--primary); }
     .mc-caution   .mc-badge { background: rgba(251,191,36,.15);  color: var(--warning); }
     .mc-risk      .mc-badge { background: rgba(251,146,60,.15);  color: var(--orange); }
     .mc-poor      .mc-badge { background: rgba(248,113,113,.15); color: var(--danger); }
@@ -380,7 +380,7 @@
     .rec-item {
       display: flex; align-items: flex-start; gap: 14px;
       padding: 14px 18px;
-      background: rgba(5,15,34,.65); border: 1px solid var(--border);
+      background: rgba(30,31,35,.65); border: 1px solid var(--border);
       border-radius: 13px;
     }
     .rec-ico { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; font-size: 17px; flex-shrink: 0; }
@@ -405,13 +405,13 @@
     /* Next steps */
     .steps-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; margin-bottom: 32px; }
     .nstep {
-      background: rgba(12,24,50,.88); border: 1px solid var(--border);
+      background: rgba(42,43,48,.88); border: 1px solid var(--border);
       border-radius: 17px; padding: 22px; text-align: center;
       backdrop-filter: blur(20px);
     }
     .nstep-num {
       width: 30px; height: 30px; margin: 0 auto 14px;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      background: linear-gradient(135deg, #FCD230, #F59231);
       border-radius: 9px; display: grid; place-items: center;
       font-size: 13px; font-weight: 800; color: white;
     }
@@ -421,7 +421,7 @@
     /* Mode toggle */
     .mode-toggle {
       display: grid; grid-template-columns: 1fr 1fr; gap: 0;
-      background: rgba(5,15,34,.9); border: 1px solid var(--border);
+      background: rgba(30,31,35,.9); border: 1px solid var(--border);
       border-radius: 14px; padding: 4px; margin-bottom: 28px;
     }
     .mode-btn {
@@ -431,8 +431,8 @@
       display: flex; align-items: center; justify-content: center; gap: 8px;
     }
     .mode-btn.active {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white; box-shadow: 0 4px 15px rgba(56,189,248,.25);
+      background: linear-gradient(135deg, #FCD230, #F59231);
+      color: #232428; box-shadow: 0 4px 15px rgba(252,210,48,.25);
     }
     .mode-btn:not(.active):hover { color: var(--text); background: rgba(255,255,255,.04); }
 
@@ -447,7 +447,7 @@
     ═══════════════════════════════════════════ */
     .toast {
       position: fixed; bottom: 24px; right: 24px; z-index: 999;
-      background: rgba(12,24,50,.97); border: 1px solid var(--border-hi);
+      background: rgba(42,43,48,.97); border: 1px solid var(--border-hi);
       border-radius: 13px; padding: 14px 20px;
       font-size: 14px; font-weight: 500;
       display: flex; align-items: center; gap: 10px;
@@ -546,7 +546,7 @@
 
         <div class="fg" id="fg-venue">
           <label>Venue Type</label>
-          <select id="inp-venue" style="width:100%; background:rgba(5,15,34,.9); border:1px solid var(--border); border-radius:13px; padding:14px 18px; font-size:14px; font-weight:600; color:var(--text); outline:none; appearance:none; cursor:pointer;">
+          <select id="inp-venue" style="width:100%; background:rgba(30,31,35,.9); border:1px solid var(--border); border-radius:13px; padding:14px 18px; font-size:14px; font-weight:600; color:var(--text); outline:none; appearance:none; cursor:pointer;">
             <option value="auto">🤖 Auto-Detect (Recommended)</option>
             <option value="outdoor">🌳 Open Field / Park</option>
             <option value="tent">⛺ Tent / Pavilion</option>
@@ -787,7 +787,7 @@
         <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:50%;background:#CD040B;border:2px solid white"></div><span style="font-size:12px;color:var(--muted);font-weight:600">Verizon</span></div>
         <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:50%;background:#00A8E0;border:2px solid white"></div><span style="font-size:12px;color:var(--muted);font-weight:600">AT&T</span></div>
         <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:50%;background:#8B5CF6;border:2px solid white"></div><span style="font-size:12px;color:var(--muted);font-weight:600">T-Mobile</span></div>
-        <div style="display:flex;align-items:center;gap:6px"><div style="width:34px;height:12px;border-radius:6px;background:linear-gradient(135deg,#38BDF8,#818CF8)"></div><span style="font-size:12px;color:var(--muted);font-weight:600">Your Site</span></div>
+        <div style="display:flex;align-items:center;gap:6px"><div style="width:34px;height:12px;border-radius:6px;background:linear-gradient(135deg,#FCD230,#F59231)"></div><span style="font-size:12px;color:var(--muted);font-weight:600">Your Site</span></div>
       </div>
     </div>
 
@@ -1290,17 +1290,17 @@ function renderCellularResults(cellData, lat, lon, containerId) {
     if (cmCarrier) {
       if (has5G && cmCarrier['5G'].signal !== null) {
         const s5g = getSignalLabel(cmCarrier['5G'].signal);
-        fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">\u2705</span><span style="font-size:11px;font-weight:700;color:var(--success)">5G Available</span><span style="font-size:10px;color:var(--muted)">' + cmCarrier['5G'].signal + ' dBm \u00b7 ' + s5g.label + '</span></div>';
+        fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(5,172,63,.1);border:1px solid rgba(5,172,63,.3);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">\u2705</span><span style="font-size:11px;font-weight:700;color:var(--success)">5G Available</span><span style="font-size:10px;color:var(--muted)">' + cmCarrier['5G'].signal + ' dBm \u00b7 ' + s5g.label + '</span></div>';
       } else if (has5G) {
-        fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">\u2705</span><span style="font-size:11px;font-weight:700;color:var(--success)">5G Available</span><span style="font-size:10px;color:var(--muted)">Coverage confirmed</span></div>';
+        fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(5,172,63,.1);border:1px solid rgba(5,172,63,.3);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">\u2705</span><span style="font-size:11px;font-weight:700;color:var(--success)">5G Available</span><span style="font-size:10px;color:var(--muted)">Coverage confirmed</span></div>';
       } else {
         fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">\u274c</span><span style="font-size:11px;font-weight:700;color:var(--dim)">No 5G</span><span style="font-size:10px;color:var(--dim)">4G/LTE only</span></div>';
       }
     } else {
       if (info.nr > 0) {
-        fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">\u2705</span><span style="font-size:11px;font-weight:700;color:var(--success)">5G Confirmed</span><span style="font-size:10px;color:var(--muted)">(' + info.nr + ' NR tower' + (info.nr > 1 ? 's' : '') + ' detected)</span></div>';
+        fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(5,172,63,.1);border:1px solid rgba(5,172,63,.3);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">\u2705</span><span style="font-size:11px;font-weight:700;color:var(--success)">5G Confirmed</span><span style="font-size:10px;color:var(--muted)">(' + info.nr + ' NR tower' + (info.nr > 1 ? 's' : '') + ' detected)</span></div>';
       } else if (info.lte >= 5) {
-        fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">\ud83d\udcf6</span><span style="font-size:11px;font-weight:700;color:var(--primary)">5G Likely</span><a href="' + style.mapUrl + '" target="_blank" style="font-size:10px;color:var(--primary);text-decoration:none;font-weight:600">Confirm on coverage map \u2197</a></div>';
+        fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(49,102,174,.08);border:1px solid rgba(49,102,174,.25);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">\ud83d\udcf6</span><span style="font-size:11px;font-weight:700;color:var(--primary)">5G Likely</span><a href="' + style.mapUrl + '" target="_blank" style="font-size:10px;color:var(--primary);text-decoration:none;font-weight:600">Confirm on coverage map \u2197</a></div>';
       } else if (info.lte >= 3) {
         fiveGBadge = '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.18);border-radius:9px;margin-bottom:12px"><span style="font-size:13px">\ud83d\udce1</span><span style="font-size:11px;font-weight:700;color:#FBBF24">5G Possible</span><a href="' + style.mapUrl + '" target="_blank" style="font-size:10px;color:#FBBF24;text-decoration:none;font-weight:600">Confirm on coverage map \u2197</a></div>';
       }
@@ -1395,7 +1395,7 @@ function renderCellularResults(cellData, lat, lon, containerId) {
     </p>
     ${coverageAlert}
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">${cards}</div>
-    <div style="display:flex;align-items:flex-start;gap:12px;padding:16px 18px;background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.18);border-radius:13px">
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:16px 18px;background:rgba(49,102,174,.06);border:1px solid rgba(49,102,174,.18);border-radius:13px">
       <span style="font-size:20px;flex-shrink:0">💡</span>
       <div>
         <div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:4px">Recommendation</div>
@@ -1505,7 +1505,7 @@ function scoreVenue(vtype) {
 
 function getLabel(s) {
   if (s >= 85) return { lbl: 'Excellent',          sub: 'Starlink should perform great at this site',              color: '#34D399', cls: 'mc-excellent' };
-  if (s >= 70) return { lbl: 'Good',               sub: 'Starlink will likely work well here',                     color: '#38BDF8', cls: 'mc-good'      };
+  if (s >= 70) return { lbl: 'Good',               sub: 'Starlink will likely work well here',                     color: '#3166AE', cls: 'mc-good'      };
   if (s >= 55) return { lbl: 'Caution',             sub: 'Some performance risks — review recommendations',        color: '#FBBF24', cls: 'mc-caution'   };
   if (s >= 35) return { lbl: 'At Risk',             sub: 'Significant concerns — on-site scan recommended',        color: '#FB923C', cls: 'mc-risk'      };
   return          { lbl: 'Not Recommended',     sub: 'High risk of poor performance at this site',             color: '#F87171', cls: 'mc-poor'      };
@@ -1532,7 +1532,7 @@ function drawGauge(score) {
   const grad = cx.createLinearGradient(10, cy_, 200, cy_);
   grad.addColorStop(0,    '#F87171');
   grad.addColorStop(0.35, '#FBBF24');
-  grad.addColorStop(0.65, '#38BDF8');
+  grad.addColorStop(0.65, '#3166AE');
   grad.addColorStop(1,    '#34D399');
 
   cx.beginPath();
@@ -1610,8 +1610,8 @@ function initMap(lat, lon) {
   const ico = L.divIcon({
     html: `<div style="
       width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
-      background:linear-gradient(135deg,#38BDF8,#818CF8);border:3px solid white;
-      box-shadow:0 4px 18px rgba(56,189,248,.55)"></div>`,
+      background:linear-gradient(135deg,#FCD230,#F59231);border:3px solid white;
+      box-shadow:0 4px 18px rgba(252,210,48,.55)"></div>`,
     iconSize: [34, 34], iconAnchor: [17, 34]
   });
   L.marker([lat, lon], { icon: ico })
@@ -1619,7 +1619,7 @@ function initMap(lat, lon) {
     .addTo(leafletMap);
 
   L.circle([lat, lon], {
-    radius: 1500, color: '#38BDF8', fillColor: '#38BDF8',
+    radius: 1500, color: '#FCD230', fillColor: '#FCD230',
     fillOpacity: 0.04, weight: 1.2, dashArray: '5,7'
   }).addTo(leafletMap);
 }
@@ -1651,7 +1651,7 @@ function renderHorizonChart(horizonAngles) {
           label: 'Starlink min clearance (25°)',
           data: Array(16).fill(25),
           backgroundColor: 'transparent',
-          borderColor:     'rgba(56,189,248,0.45)',
+          borderColor:     'rgba(252,210,48,0.45)',
           borderDash: [5,5], pointRadius: 0, borderWidth: 1.5
         }
       ]
@@ -1683,7 +1683,7 @@ function buildRecs({ satScore, terScore, wxScore, venScore, vtype, weather, lat,
   const avgAngle = horizonAngles.reduce((s, h) => s + h.angle, 0) / horizonAngles.length;
 
   if (terScore < 65 || avgAngle > 8) recs.push({
-    ico:'📡', bg:'rgba(56,189,248,.12)',
+    ico:'📡', bg:'rgba(49,102,174,.12)',
     title: 'Run the Starlink App Sky Scan',
     desc: 'Download the Starlink app and use its built-in sky obstruction scanner at the exact dish placement spot. Share the scan results with Fello before the event.'
   });
@@ -1701,7 +1701,7 @@ function buildRecs({ satScore, terScore, wxScore, venScore, vtype, weather, lat,
   });
 
   if (Math.abs(lat) > 58) recs.push({
-    ico:'🌐', bg:'rgba(129,140,248,.10)',
+    ico:'🌐', bg:'rgba(245,146,49,.10)',
     title: 'High Latitude — Verify Service Coverage',
     desc: 'Your location is at a high latitude where Starlink satellite density can be lower. Confirm active service coverage at this specific address via starlink.com before booking.'
   });
@@ -1713,13 +1713,13 @@ function buildRecs({ satScore, terScore, wxScore, venScore, vtype, weather, lat,
   });
 
   recs.push({
-    ico:'⚡', bg:'rgba(56,189,248,.07)',
+    ico:'⚡', bg:'rgba(49,102,174,.07)',
     title: 'Request a 24-Hour Pre-Event Test Kit',
     desc: 'For high-stakes events, Fello can ship the dish 24 hours early so you can confirm connectivity at the actual venue before event day.'
   });
 
   recs.push({
-    ico:'📶', bg:'rgba(52,211,153,.07)',
+    ico:'📶', bg:'rgba(5,172,63,.07)',
     title: 'Add Cellular Backup for Critical Events',
     desc: 'Pair your Starlink with an embedded SIM, mobile cellular router, or mobile hotspot for guaranteed uptime — even if the dish temporarily loses signal.'
   });
@@ -1793,14 +1793,14 @@ function renderResults(d) {
   // Metric cards
   const metricDefs = [
     {
-      icon:'🛰️', iconBg:'rgba(56,189,248,.12)', label:'Satellite Coverage', score: satScore,
+      icon:'🛰️', iconBg:'rgba(49,102,174,.12)', label:'Satellite Coverage', score: satScore,
       detail: `Starlink orbital coverage at ${Math.abs(lat).toFixed(1)}° ${lat >= 0 ? 'N' : 'S'} latitude. ` +
               (satScore >= 85 ? 'Excellent satellite density — full coverage expected.' :
                satScore >= 70 ? 'Good coverage with multiple orbital shells passing overhead.' :
                'Reduced density — confirm service availability at this location.')
     },
     {
-      icon:'🏔️', iconBg:'rgba(129,140,248,.12)', label:'Terrain Clearance', score: terScore,
+      icon:'🏔️', iconBg:'rgba(245,146,49,.12)', label:'Terrain Clearance', score: terScore,
       detail: `Avg horizon elevation: ${(horizonAngles.reduce((s, h) => s + h.angle, 0) / horizonAngles.length).toFixed(1)}° across 16 compass directions. Starlink needs clear sky above ~25°. ` +
               (terScore >= 75 ? 'Terrain is mostly flat — clear sky access expected.' :
                terScore >= 55 ? 'Some terrain obstructions detected — see horizon radar chart.' :
@@ -2055,11 +2055,11 @@ function renderCellularOnlyResults(location, cellData) {
     cellMap = L.map(document.getElementById('cell-map')).setView([location.lat, location.lon], 14);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB' }).addTo(cellMap);
     const siteIcon = L.divIcon({
-      html: '<div style="width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:linear-gradient(135deg,#38BDF8,#818CF8);border:3px solid white;box-shadow:0 4px 18px rgba(56,189,248,.55)"></div>',
+      html: '<div style="width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:linear-gradient(135deg,#FCD230,#F59231);border:3px solid white;box-shadow:0 4px 18px rgba(252,210,48,.55)"></div>',
       iconSize: [34, 34], iconAnchor: [17, 34]
     });
     L.marker([location.lat, location.lon], { icon: siteIcon }).bindPopup('<strong>Event Site</strong>').addTo(cellMap);
-    L.circle([location.lat, location.lon], { radius: 900, color: '#38BDF8', fillColor: '#38BDF8', fillOpacity: 0.04, weight: 1.2, dashArray: '5,7' }).addTo(cellMap);
+    L.circle([location.lat, location.lon], { radius: 900, color: '#FCD230', fillColor: '#FCD230', fillOpacity: 0.04, weight: 1.2, dashArray: '5,7' }).addTo(cellMap);
     if (cellData && cellData.towerLocations) addTowerMarkers(cellMap, cellData.towerLocations);
     setTimeout(() => cellMap.invalidateSize(), 200);
   }, 300);

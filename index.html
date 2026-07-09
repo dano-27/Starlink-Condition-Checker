@@ -1162,11 +1162,20 @@ async function getTerrainObstructions(lat, lon, horizonAngles) {
         isOpenSpace = true;
       }
 
-      if (tags.building && dist > 5 && dist !== Infinity) {
-        let height = 12; // default
-        if (tags.height) height = parseFloat(tags.height);
-        else if (tags['building:levels']) height = parseFloat(tags['building:levels']) * 3.5;
-        if (isNaN(height) || height <= 0) height = 12;
+      if (tags.building && dist > 20 && dist !== Infinity) {
+        let height = 8; // default for generic residential
+        if (tags.height) {
+          height = parseFloat(tags.height);
+        } else if (tags['building:levels']) {
+          height = parseFloat(tags['building:levels']) * 3.5;
+        } else {
+          // Use taller defaults only for non-residential building types
+          const tallTypes = ['commercial','industrial','office','warehouse','retail','hotel','hospital','university','school','apartments','public'];
+          if (tallTypes.includes(tags.building)) height = 14;
+          else if (tags.building === 'house' || tags.building === 'residential' || tags.building === 'detached' || tags.building === 'garage' || tags.building === 'shed') height = 7;
+          // 'yes' stays at 8m (reasonable suburban average)
+        }
+        if (isNaN(height) || height <= 0) height = 8;
 
         const elevAngle = Math.atan2(height, dist) * 180 / Math.PI;
         maxElevAngle = Math.max(maxElevAngle, elevAngle);
